@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tiles-definitions PUBLIC
+"-//Apache Software Foundation//DTD Tiles Configuration 2.0//EN"
+"http://tiles.apache.org/dtds/tiles-config_2_0.dtd">
+
+<tiles-definitions>
+<!-- 	회원용 페이지 -->
+	<definition name="baseLayout" template="/WEB-INF/views/common/layout.jsp">
+		<put-attribute name="title" value="" />
+		<put-attribute name="header" value="/WEB-INF/views/common/header.jsp" />
+		<put-attribute name="body" value="" />
+		<put-attribute name="footer" value="/WEB-INF/views/common/footer.jsp" />
+	</definition>
+	
+	<definition name="main" extends="baseLayout">
+		<put-attribute name="title" value="SSG LANDERS" />
+		<put-attribute name="body" value="/WEB-INF/views/main.jsp" />
+	</definition>
+	
+	<definition name="board/listBoard" extends="baseLayout">
+		<put-attribute name="title" value="자유게시판 (최신순)" />
+		<put-attribute name="body" value="/WEB-INF/views/board/listBoard.jsp" />
+	</definition>
+	
+	<definition name="board/listBoardByViewCount" extends="baseLayout">
+		<put-attribute name="title" value="자유게시판 (조회순)" />
+		<put-attribute name="body" value="/WEB-INF/views/board/listBoardByViewCount.jsp" />
+	</definition>
+	
+	<definition name="notice/listNotice" extends="baseLayout">
+		<put-attribute name="title" value="공지사항 (최신순)" />
+		<put-attribute name="body" value="/WEB-INF/views/notice/listNotice.jsp" />
+	</definition>
+	
+	<definition name="notice/listNoticeByViewCount" extends="baseLayout">
+		<put-attribute name="title" value="공지사항 (조회순)" />
+		<put-attribute name="body" value="/WEB-INF/views/notice/listNoticeByViewCount.jsp" />
+	</definition>
+	
+	
+<!-- 	관리자용 페이지 -->
+	<definition name="baseLayoutForAdmin" template="/WEB-INF/views/common/layout.jsp">
+		<put-attribute name="title" value="" />
+		<put-attribute name="header" value="/WEB-INF/views/common/headerForAdmin.jsp" />
+		<put-attribute name="body" value="" />
+		<put-attribute name="footer" value="/WEB-INF/views/common/footer.jsp" />
+	</definition>
+	
+	<definition name="mainForAdmin" extends="baseLayoutForAdmin">
+		<put-attribute name="title" value="SSG LANDERS (관리자용)" />
+		<put-attribute name="body" value="/WEB-INF/views/mainForAdmin.jsp" />
+	</definition>
+	
+	<definition name="board/listBoardForAdmin" extends="baseLayoutForAdmin">
+		<put-attribute name="title" value="관리자용 자유게시판 (최신순)" />
+		<put-attribute name="body" value="/WEB-INF/views/board/listBoardForAdmin.jsp" />
+	</definition>
+	
+	<definition name="board/listBoardByViewCountForAdmin" extends="baseLayoutForAdmin">
+		<put-attribute name="title" value="관리자용 자유게시판 (조회순)" />
+		<put-attribute name="body" value="/WEB-INF/views/board/listBoardByViewCountForAdmin.jsp" />
+	</definition>
+	
+	<definition name="notice/listNoticeForAdmin" extends="baseLayoutForAdmin">
+		<put-attribute name="title" value="관리자용 공지사항 (최신순)" />
+		<put-attribute name="body" value="/WEB-INF/views/notice/listNoticeForAdmin.jsp" />
+	</definition>
+	
+	<definition name="notice/listNoticeByViewCountForAdmin" extends="baseLayoutForAdmin">
+		<put-attribute name="title" value="관리자용 공지사항 (조회순)" />
+		<put-attribute name="body" value="/WEB-INF/views/notice/listNoticeByViewCountForAdmin.jsp" />
+	</definition>
+	
+<!-- 	<definition name="*" extends="baseLayout"> -->
+<!-- 		<put-attribute name="title" value="{1}" /> -->
+<!-- 		<put-attribute name="body" value="/WEB-INF/views/{1}.jsp" /> -->
+<!-- 	</definition> -->
+   
+<!-- 	<definition name="*/*" extends="baseLayout"> -->
+<!-- 		<put-attribute name="title" value="{2}" /> -->
+<!-- 		<put-attribute name="body" value="/WEB-INF/views/{1}/{2}.jsp" /> -->
+<!-- 	</definition> -->
+
+</tiles-definitions>

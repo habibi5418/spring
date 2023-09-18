@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+      PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mapper.notice">
+	
+	<resultMap id="noticeMap" type="Notice" />
+	
+    <select id="findRecent5" statementType="CALLABLE">
+	   	{call findRecent5 (
+	    	#{out_cursor, mode=OUT, jdbcType=CURSOR, javaType=ResultSet, resultMap=noticeMap}
+	   	)}
+    </select>
+	
+	<select id="increaseViews" statementType="CALLABLE">
+		{call increaseViews (
+			#{noticeid}
+		)}
+	</select>
+	
+    <select id="getNoticeByNoticeid" statementType="CALLABLE">
+	   	{call getNoticeByNoticeid(
+	   		#{noticeid, mode=IN, jdbcType=INTEGER}
+	   		, #{out_cursor, mode=OUT, jdbcType=CURSOR, javaType=ResultSet, resultMap=noticeMap}
+	   	)}
+    </select>
+	
+    <select id="getAllNoticeListNoFix" statementType="CALLABLE">
+	   	{call getAllNoticeListNoFix(
+	   		#{out_cursor, mode=OUT, jdbcType=CURSOR, javaType=ResultSet, resultMap=noticeMap}
+	   	)}
+    </select>
+	
+    <select id="getAllNoticeListByViewCountNoFix" statementType="CALLABLE">
+	   	{call getAllNoticeListByVNF(
+	   		#{out_cursor, mode=OUT, jdbcType=CURSOR, javaType=ResultSet, resultMap=noticeMap}
+	   	)}
+    </select>
+	
+    <select id="findFixed5" statementType="CALLABLE">
+	   	{call findFixed5(
+	   		#{out_cursor, mode=OUT, jdbcType=CURSOR, javaType=ResultSet, resultMap=noticeMap}
+	   	)}
+    </select>
+	
+    <select id="findFixed5ByView" statementType="CALLABLE">
+	   	{call findFixed5ByView(
+	   		#{out_cursor, mode=OUT, jdbcType=CURSOR, javaType=ResultSet, resultMap=noticeMap}
+	   	)}
+    </select>
+	
+    <select id="getAllNoticePageList" statementType="CALLABLE">
+	   	{call getAllNoticePageList(
+	   		#{startNo}
+	   		, #{endNo}
+	   		, #{out_cursor, mode=OUT, jdbcType=CURSOR, javaType=ResultSet, resultMap=noticeMap}
+	   	)}
+    </select>
+	
+    <select id="getAllNoticePageListT" statementType="CALLABLE">
+	   	{call getAllNoticePageListT(
+	   		#{searchText}
+	   		, #{startNo}
+	   		, #{endNo}
+	   		, #{out_cursor, mode=OUT, jdbcType=CURSOR, javaType=ResultSet, resultMap=noticeMap}
+	   	)}
+    </select>
+	
+    <select id="getAllNoticePageListC" statementType="CALLABLE">
+	   	{call getAllNoticePageListC(
+	   		#{searchText}
+	   		, #{startNo}
+	   		, #{endNo}
+	   		, #{out_cursor, mode=OUT, jdbcType=CURSOR, javaType=ResultSet, resultMap=noticeMap}
+	   	)}
+    </select>
+	
+    <select id="getAllNoticePageListW" statementType="CALLABLE">
+	   	{call getAllNoticePageListW(
+	   		#{searchText}
+	   		, #{startNo}
+	   		, #{endNo}
+	   		, #{out_cursor, mode=OUT, jdbcType=CURSOR, javaType=ResultSet, resultMap=noticeMap}
+	   	)}
+    </select>
+	
+    <select id="getAllNoticePageListByViewCount" statementType="CALLABLE">
+	   	{call getAllNoticePageListByV(
+	   		#{startNo}
+	   		, #{endNo}
+	   		, #{out_cursor, mode=OUT, jdbcType=CURSOR, javaType=ResultSet, resultMap=noticeMap}
+	   	)}
+    </select>
+	
+    <select id="getAllNoticePageListByViewCountT" statementType="CALLABLE">
+	   	{call getAllNoticePageListByVT(
+	   		#{searchText}
+	   		, #{startNo}
+	   		, #{endNo}
+	   		, #{out_cursor, mode=OUT, jdbcType=CURSOR, javaType=ResultSet, resultMap=noticeMap}
+	   	)}
+    </select>
+	
+    <select id="getAllNoticePageListByViewCountC" statementType="CALLABLE">
+	   	{call getAllNoticePageListByVC(
+	   		#{searchText}
+	   		, #{startNo}
+	   		, #{endNo}
+	   		, #{out_cursor, mode=OUT, jdbcType=CURSOR, javaType=ResultSet, resultMap=noticeMap}
+	   	)}
+    </select>
+	
+    <select id="getAllNoticePageListByViewCountW" statementType="CALLABLE">
+	   	{call getAllNoticePageListByVW(
+	   		#{searchText}
+	   		, #{startNo}
+	   		, #{endNo}
+	   		, #{out_cursor, mode=OUT, jdbcType=CURSOR, javaType=ResultSet, resultMap=noticeMap}
+	   	)}
+    </select>
+	
+    <select id="getTotalCount" statementType="CALLABLE">
+	   	{call getTotalCount(
+	   		#{p_cnt, mode=OUT, jdbcType=INTEGER}
+	   	)}
+    </select>
+	
+    <select id="getTotalCountT" statementType="CALLABLE">
+	   	{call getTotalCountT(
+	   		#{searchText}
+	   		, #{p_cnt, mode=OUT, jdbcType=INTEGER}
+	   	)}
+    </select>
+	
+    <select id="getTotalCountC" statementType="CALLABLE">
+	   	{call getTotalCountC(
+	   		#{searchText}
+	   		, #{p_cnt, mode=OUT, jdbcType=INTEGER}
+	   	)}
+    </select>
+	
+    <select id="getTotalCountW" statementType="CALLABLE">
+	   	{call getTotalCountW(
+	   		#{searchText}
+	   		, #{p_cnt, mode=OUT, jdbcType=INTEGER}
+	   	)}
+    </select>
+	
+    <select id="getMoreNoticePageList" statementType="CALLABLE">
+	   	{call getMoreNoticePageList(
+	   		#{noticeid}
+	   		, #{startNo}
+	   		, #{endNo}
+	   		, #{out_cursor, mode=OUT, jdbcType=CURSOR, javaType=ResultSet, resultMap=noticeMap}
+	   	)}
+    </select>
+	
+    <select id="getMoreNoticePageListT" statementType="CALLABLE">
+	   	{call getMoreNoticePageListT(
+	   		#{noticeid}
+	   		, #{searchText}
+	   		, #{startNo}
+	   		, #{endNo}
+	   		, #{out_cursor, mode=OUT, jdbcType=CURSOR, javaType=ResultSet, resultMap=noticeMap}
+	   	)}
+    </select>
+	
+    <select id="getMoreNoticePageListC" statementType="CALLABLE">
+	   	{call getMoreNoticePageListC(
+	   		#{noticeid}
+	   		, #{searchText}
+	   		, #{startNo}
+	   		, #{endNo}
+	   		, #{out_cursor, mode=OUT, jdbcType=CURSOR, javaType=ResultSet, resultMap=noticeMap}
+	   	)}
+    </select>
+	
+    <select id="getMoreNoticePageListW" statementType="CALLABLE">
+	   	{call getMoreNoticePageListW(
+	   		#{noticeid}
+	   		, #{searchText}
+	   		, #{startNo}
+	   		, #{endNo}
+	   		, #{out_cursor, mode=OUT, jdbcType=CURSOR, javaType=ResultSet, resultMap=noticeMap}
+	   	)}
+    </select>
+	
+    <select id="getMoreNoticePageListByViewCount" statementType="CALLABLE">
+	   	{call getMoreNoticePageListByV(
+	   		#{view_count}
+	   		, #{startNo}
+	   		, #{endNo}
+	   		, #{out_cursor, mode=OUT, jdbcType=CURSOR, javaType=ResultSet, resultMap=noticeMap}
+	   	)}
+    </select>
+	
+    <select id="getMoreNoticePageListByViewCountT" statementType="CALLABLE">
+	   	{call getMoreNoticePageListByVT(
+	   		#{view_count}
+	   		, #{searchText}
+	   		, #{startNo}
+	   		, #{endNo}
+	   		, #{out_cursor, mode=OUT, jdbcType=CURSOR, javaType=ResultSet, resultMap=noticeMap}
+	   	)}
+    </select>
+	
+    <select id="getMoreNoticePageListByViewCountC" statementType="CALLABLE">
+	   	{call getMoreNoticePageListByVC(
+	   		#{view_count}
+	   		, #{searchText}
+	   		, #{startNo}
+	   		, #{endNo}
+	   		, #{out_cursor, mode=OUT, jdbcType=CURSOR, javaType=ResultSet, resultMap=noticeMap}
+	   	)}
+    </select>
+	
+    <select id="getMoreNoticePageListByViewCountW" statementType="CALLABLE">
+	   	{call getMoreNoticePageListByVW(
+	   		#{view_count}
+	   		, #{searchText}
+	   		, #{startNo}
+	   		, #{endNo}
+	   		, #{out_cursor, mode=OUT, jdbcType=CURSOR, javaType=ResultSet, resultMap=noticeMap}
+	   	)}
+    </select>
+	
+	<select id="writeNotice" statementType="CALLABLE" >
+		{call writeNotice(
+			#{title}
+			, #{contents}
+			, #{writer_uid}
+	   		, #{p_result, mode=OUT, jdbcType=INTEGER}
+		)}
+	</select>
+	
+	<select id="updateNotice" statementType="CALLABLE" >
+		{call updateNotice(
+			#{noticeid}
+			, #{title}
+			, #{contents}
+	   		, #{p_result, mode=OUT, jdbcType=INTEGER}
+		)}
+	</select>
+	
+	<select id="deleteNotice" statementType="CALLABLE" >
+		{call deleteNotice(
+			#{noticeid}
+	   		, #{p_result, mode=OUT, jdbcType=INTEGER}
+		)}
+	</select>
+	
+	<select id="fixNotice" statementType="CALLABLE" >
+		{call fixNotice(
+			#{noticeid}
+			, #{doYN}
+	   		, #{p_result, mode=OUT, jdbcType=INTEGER}
+		)}
+	</select>
+	
+	<select id="deleteNotices">
+		update notice 
+		set delete_yn = 'Y' 
+		where noticeid in(#{deleteNotices})
+	</select>
+	
+</mapper>

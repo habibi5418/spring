@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration 	PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+	<typeAliases>
+		<typeAlias type="com.kosa.ssg.member.domain.Member"  alias="Member" />
+		<typeAlias type="com.kosa.ssg.board.domain.Board"  alias="Board" />
+<!-- 		<typeAlias type="com.kosa.ssg.board.domain.AttachFile"  alias="AttachFile" /> -->
+		<typeAlias type="com.kosa.ssg.notice.domain.Notice"  alias="Notice" />
+	</typeAliases>
+</configuration>

@@ -7,7 +7,6 @@ import com.kosa.ssg.member.domain.Member;
 
 public interface MemberDao {
 	List<Member> getAllMemberList();
-	Member getMemberByMemid(String memid);
 	String getMemidByMnamePhone(Member member);
 	String getPwdByMemidMname(Member member);
 	Member getMemberByMemidPwd(Member member);

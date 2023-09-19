@@ -2,12 +2,14 @@
     pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 	    <div id="listContainer">
- 			<a href="<c:url value='/board/listBoard.do'/>" id="listByRecentButton" class="detailBtns">최신순</a>
+ 			<a href="<c:url value='/board/listBoardForAdmin.do'/>" id="listByRecentButton" class="detailBtns">최신순</a>
 	    	<button type="button" id="listWriteButton">글작성</button>
+			<a id="listDeleteButton" class="detailBtns">삭제</a>
 	    	
 			<table class="table">
-				<caption>ALL BOARD - 조회순</caption>
+				<caption>ALL NOTICE - 조회순</caption>
 					<tr id="boardTemp" style="display: none;">
+						<td><input type='checkbox' id="checkBoardidTemp" class="checkBoard" value=""></td>
 						<td id="boardidTemp"></td>
 						<td>
 							<a onclick="detailBoard(this.getAttribute('data-boardid'))" href="#" id="title" data-boardid="{boardid}"></a>
@@ -17,8 +19,9 @@
 						<td id="view_count"></td>
 					</tr> 
 					<tr>
+						<th width="5%"><input id="allCheck" type="checkbox"></th>
 						<th width="8%">글번호</th>
-	  			   		<th width="50%">글제목</th>
+	  			   		<th width="45%">글제목</th>
 						<th width="20%">작성자</th>
 						<th width="15%">작성일자</th>
 						<th width="7%">조회</th>
@@ -26,6 +29,7 @@
 					<tbody id="boardTbody">
 						<c:forEach var="board" items="${result.boardList }">
 							<tr>
+							<td><input type='checkbox' class="checkBoard" value='${board.getBoardid() }'></td>
 								<td id="boardid">${board.getBoardid() }</td>
 								<td>
 									<a onclick="detailBoard(this.getAttribute('data-boardid'))" href="#" data-boardid="${board.boardid}">
@@ -76,7 +80,7 @@
 				</form>
 			</div>
 			
-			<form id="pageForm" name="pageForm" action="<c:url value='/board/listBoardByViewCount.do'/>" method="post">
+			<form id="pageForm" name="pageForm" action="<c:url value='/board/listBoardByViewCountForAdmin.do'/>" method="post">
 				<input type="hidden" id="pageNo" name="pageNo" value="${result.board.pageNo }"/>
 				<input type="hidden" id="searchType" name="searchType" value="${result.board.searchType }"/>
 				<input type="hidden" id="searchText" name="searchText" value="${result.board.searchText }"/>
@@ -333,7 +337,7 @@
     			.then((response) => response.json())
     			.then((json) => {
     				alert(json.message);
-    				if (json.status) location.href = "<c:url value='/board/listBoardByViewCount.do'/>";
+    				if (json.status) location.href = "<c:url value='/board/listBoardByViewCountForAdmin.do'/>";
     			});
       		}
       	});
@@ -363,4 +367,104 @@
     		document.querySelector("#pageForm").submit();
     	}
     	
+    	// 전체 체크
+    	document.querySelector("#allCheck").addEventListener("click", function() {
+    		var checks = document.querySelectorAll("input[type='checkbox']");
+    		checks.forEach(checkbox => {
+    			checkbox.checked = this.checked;
+    		});
+    		$("#checkBoardidTemp").prop("checked", false);
+    	});
+    	
+    	// 체크 삭제
+    	document.querySelector("#listDeleteButton").addEventListener("click", function() {
+      		if (confirm("선택한 게시물들을 삭제하시겠습니까 ?")) {
+        		var deleteBoards = [];
+        		var checks2 = document.querySelectorAll(".checkBoard:checked");
+        		var cnt = checks2.length;
+        		
+        		checks2.forEach(checkbox => {
+        				deleteBoards.push(checkbox.value);
+        		});
+        		
+        		if (deleteBoards.length == 0) {
+        			alert("삭제할 게시물을 체크해주세요.");
+        		} else {
+            		const param = {
+            				deleteBoards: deleteBoards
+        			}
+            		
+            		fetch("<c:url value='/board/deleteBoards.do'/>", {
+            			
+        				method: "POST",
+        				headers: {
+        				    "Content-Type": "application/json; charset=UTF-8",
+        				},
+        				body: JSON.stringify(param),
+        			})
+        			.then((response) => response.json())
+        			.then((json) => {
+        				alert(json.message);
+        				if (json.status) {
+        					boardid = document.querySelector("#boardTbody > tr:last-child > td:nth-child(2)").innerText;
+        					view_count = document.querySelector("#boardTbody > tr:last-child > td:nth-child(6)").innerText;
+
+        			    	var currentBoards = [];
+        					current = document.querySelectorAll("#boardTbody > tr > td:nth-child(2)");
+        					current.forEach(board => {
+        						currentBoards.push(board.innerText);
+        					});
+        					
+	        				$("#allCheck").prop("checked", false);
+	                		checks2.forEach(checkbox => {
+	            				checkbox.parentElement.parentElement.remove();
+	            			});	
+	        				
+	        	    		const param2 = {
+	        	    			boardid: boardid,
+	        	    			view_count: view_count,
+	        	    			currentBoards: currentBoards,
+	        	    			searchType: document.querySelector("#pageForm > #searchType").value,
+	        		    		searchText: document.querySelector("#pageForm > #searchText").value,
+	        		    		pageLength: cnt,
+	        		    		order: "view"
+	        	    		}
+	        	    		
+	        	    		fetch("<c:url value='/board/moreListBoard.do'/>", {
+	        					method: "POST",
+	        					headers: {
+	        					    "Content-Type": "application/json; charset=UTF-8",
+	        					},
+	        					body: JSON.stringify(param2),
+	        				})
+	        				.then((response) => response.json())
+	        				.then((json) => {
+	        					const boardList = json.boardList;
+	        					const boardTemp = document.querySelector("#boardTemp");
+	        					const boardListHTML = document.querySelector("#boardTbody");
+	        					
+	        					for (let i = 0; i < boardList.length; i++) {
+	        						const board = boardList[i];
+	        						const newBoardItem = boardTemp.cloneNode(true);
+	        						const title = newBoardItem.querySelector("#title");
+	        						
+	        						newBoardItem.querySelector("#checkBoardidTemp").value = board.boardid;
+	        						newBoardItem.querySelector("#boardidTemp").innerText = board.boardid;
+	        						
+        							title.innerText = board.title;
+	        						title.setAttribute("data-boardid", board.boardid);
+	        						
+	        						newBoardItem.querySelector("#writer_uid").innerText = board.writer_uid;
+	        						newBoardItem.querySelector("#reg_date").innerText = board.reg_date;
+	        						newBoardItem.querySelector("#view_count").innerText = board.view_count;
+	        						
+	        						newBoardItem.style.display = "";
+	        						boardListHTML.appendChild(newBoardItem);
+	        					}
+	        				});
+        				}
+        			});
+        		}
+      		} 
+      	});
     </script>

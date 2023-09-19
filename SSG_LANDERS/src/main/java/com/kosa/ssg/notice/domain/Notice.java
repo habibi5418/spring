@@ -19,8 +19,9 @@ public class Notice {
 	private String fixed_yn;
 	
 	private String order;
-	private String deleteNotices;
+	private String[] deleteNotices;
 	private String doYN;
+	private String[] currentNotices;
 
 	private String searchType = "";
 	private String searchText = "";

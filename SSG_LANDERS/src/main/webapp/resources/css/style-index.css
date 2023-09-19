@@ -456,19 +456,18 @@ nav {
 }
 
 /* 폼 CSS */
-#form {
+.form {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	text-align: center;
-	margin-top: 120px;
 }
 
-#form h1 {
+.form h1 {
 	margin-bottom: 20px;
 }
 
-#form input[type="text"], form input[type="password"], form input[type="tel"]
+.form input[type="text"], form input[type="password"], form input[type="tel"]
 	{
 	width: 360px; /* 원하는 너비로 조정 */
 	padding: 10px;
@@ -476,7 +475,7 @@ nav {
 	border: 1px solid #ddd;
 	border-radius: 4px;
 }
-#form input[type="submit"], #form input[type="button"] {
+.form input[type="submit"], .form input[type="button"] {
 	width: 360px;
 	padding: 10px 20px;
 	background-color: #C8102E;
@@ -486,15 +485,15 @@ nav {
 	cursor: pointer;
 }
 
-#form input[type="submit"]:hover, #form input[type="button"]:hover {
+.form input[type="submit"]:hover, .form input[type="button"]:hover {
 	background-color: #96091D;
 }
 
-#form input[type="submit"]:focus, #form input[type="button"]:focus {
+.form input[type="submit"]:focus, .form input[type="button"]:focus {
 	outline: none;
 }
 
-#form .links a {
+.form .links a {
 	display: inline-block;
 	margin-right: 10px;
 	color: #C8102E;
@@ -502,17 +501,21 @@ nav {
 	text-decoration: none;
 }
 
-#form .links span {
+.form .links span {
 	color: #bbb;
 	font-size: 16px;
 }
 
-#form .links a:last-child {
+.form .links a:last-child {
 	margin-right: 0;
 }
 
-#form p {
+.form p {
 	margin-bottom: 10px;
+}
+
+#openDeleteForm {
+	background-color: #e6690e !important;
 }
 
 #deleteBtn {
@@ -905,7 +908,21 @@ nav {
 }
 
 /* #dialog-form {width: 50%;} */
-.dialog-form label, .dialog-form input { display:block; }
+.dialog-form label, .dialog-form input { display:block; justify-content: center; }
 .dialog-form input.text { margin-bottom:12px; width:95%; padding: .4em; }
 .dialog-form fieldset { padding:0; border:0; margin-top:25px; }
 
+#login-form, #findId-form, #findPwd-form {
+	margin-top: 120px;
+}
+#updateMember-form, #deleteMember-form {
+	margin-top: 90px;
+}
+#register-form, #myPage-form {
+	margin-top: 60px;
+}
+
+
+#boardTbodyTitle {
+	text-align: left;
+}

@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.kosa.ssg.board.service.BoardService;
+import com.kosa.ssg.member.service.MemberService;
 import com.kosa.ssg.notice.service.NoticeService;
 
 /**
@@ -19,6 +20,8 @@ public class HomeController {
 	private BoardService boardService;
 	@Autowired
 	private NoticeService noticeService;
+	@Autowired
+	private MemberService memberService;
 
 	@RequestMapping(value = {"/", "/main.do"}, method = RequestMethod.GET)
 	public String index(Model model) {
@@ -33,6 +36,7 @@ public class HomeController {
 		
 		model.addAttribute("recentNoticeList", noticeService.recent());
 		model.addAttribute("recentBoardList", boardService.recent());
+		model.addAttribute("memberList", memberService.allMemberPrint()); 
 		
 		return "mainForAdmin";
 	}

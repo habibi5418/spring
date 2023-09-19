@@ -25,7 +25,6 @@ public class NoticeDaoImpl implements NoticeDao {
 		
 		sqlSession.selectList("mapper.notice.getAllNoticeListNoFix", map);
 		
-		@SuppressWarnings("unchecked")
 		List<Notice> list = (List<Notice>) map.get("out_cursor");
 		
 		return list;
@@ -174,39 +173,8 @@ public class NoticeDaoImpl implements NoticeDao {
 		
 		return (List<Notice>) map.get("out_cursor");
 	}
-
-	// 페이지용 게시물 더보기 (최신순)
-	@Override
-	public List<Notice> getMoreNoticePageListByViewCount(Notice notice) {
-		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("view_count", notice.getView_count());
-		map.put("searchText", notice.getSearchText());
-		map.put("startNo", notice.getStartNo());
-		map.put("endNo", notice.getEndNo());
-		
-		switch (notice.getSearchType()) {
-		case "": {
-			sqlSession.selectList("mapper.notice.getMoreNoticePageListByViewCount", map);
-			break;
-		}
-		case "title": {
-			sqlSession.selectList("mapper.notice.getMoreNoticePageListByViewCountT", map);
-			break;
-		}
-		case "contents": {
-			sqlSession.selectList("mapper.notice.getMoreNoticePageListByViewCountC", map);
-			break;
-		}
-		case "writer_uid": {
-			sqlSession.selectList("mapper.notice.getMoreNoticePageListByViewCountW", map);
-			break;
-		}
-		}
-		
-		return (List<Notice>) map.get("out_cursor");
-	}
 	
-	// 페이지용 게시물 더보기 (조회순)
+	// 페이지용 게시물 더보기 (최신순)
 	@Override
 	public List<Notice> getMoreNoticePageList(Notice notice) {
 		Map<String, Object> map = new HashMap<String, Object>();
@@ -230,6 +198,37 @@ public class NoticeDaoImpl implements NoticeDao {
 		}
 		case "writer_uid": {
 			sqlSession.selectList("mapper.notice.getMoreNoticePageListW", map);
+			break;
+		}
+		}
+		
+		return (List<Notice>) map.get("out_cursor");
+	}
+
+	// 페이지용 게시물 더보기 (조회순)
+	@Override
+	public List<Notice> getMoreNoticePageListByViewCount(Notice notice) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("view_count", notice.getView_count());
+		map.put("searchText", notice.getSearchText());
+		map.put("startNo", notice.getStartNo());
+		map.put("endNo", notice.getEndNo());
+		
+		switch (notice.getSearchType()) {
+		case "": {
+			sqlSession.selectList("mapper.notice.getMoreNoticePageListByViewCount", map);
+			break;
+		}
+		case "title": {
+			sqlSession.selectList("mapper.notice.getMoreNoticePageListByViewCountT", map);
+			break;
+		}
+		case "contents": {
+			sqlSession.selectList("mapper.notice.getMoreNoticePageListByViewCountC", map);
+			break;
+		}
+		case "writer_uid": {
+			sqlSession.selectList("mapper.notice.getMoreNoticePageListByViewCountW", map);
 			break;
 		}
 		}

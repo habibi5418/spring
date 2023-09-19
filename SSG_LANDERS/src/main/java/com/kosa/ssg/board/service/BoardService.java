@@ -24,13 +24,23 @@ public class BoardService {
 		return boardDao.findRecent5();
 	}
 	
+	// 업데이트 폼용 게시물 정보 가져오기
+	public JSONObject getBeforeBoard(Board board) {
+		JSONObject result = new JSONObject();
+		Board updateBoard = boardDao.getBoardByBoardid(board.getBoardid());
+		
+		result.put("title", updateBoard.getTitle());
+		result.put("contents", updateBoard.getContents());
+		
+		return result;
+	}
+	
 	// 특정 게시물 가져오기 (boardid)
-	public Map<String, Object> getBoardByBoardid(int boardid, String order) {
-		Map<String, Object> result = new HashMap<>();
+	public JSONObject getBoardByBoardid(int boardid, String order) {
+		JSONObject result = new JSONObject();
 		Board board = boardDao.getBoardByBoardid(boardid);
 		List<Board> boardList = new ArrayList<>();
 
-    	result.put("location", "board/detailBoard.jsp");
 		if (board.getBoardid() == 0) {
 			result.put("message", "삭제된 게시물입니다.");
 			result.put("status", false);
@@ -42,7 +52,13 @@ public class BoardService {
 	    	int idx = boardList.indexOf(board);
 	    	int size = boardList.size();
 
-			result.put("board", board);
+			result.put("boardid", board.getBoardid());
+			result.put("title", board.getTitle());
+			result.put("contents", board.getContents());
+			result.put("writer_uid", board.getWriter_uid());
+			result.put("reg_date", board.getReg_date());
+			result.put("mod_date", board.getMod_date());
+			result.put("view_count", board.getView_count());
 			result.put("status", true);
 			result.put("first", false);
 			result.put("last", false);
@@ -69,21 +85,53 @@ public class BoardService {
 		boardDao.increaseViews(boardid);
 	}
 	
-	// 전체 게시물 가져오기 (최신순)
-	public List<Board> getAllBoardList() {
-		return boardDao.getAllBoardList();
+	// 페이지용 게시물 가져오기 (최신순)
+	public Map<String, Object> getAllBoardPageList(Board board) {
+		Map<String, Object> result = new HashMap<>();
+		board.setPageInfo(boardDao.getTotalCount(board));
+		System.out.println(board);
+		result.put("board", board);
+		result.put("boardList", boardDao.getAllBoardPageList(board));
+		
+		return result;
 	}
 	
-	// 전체 게시물 가져오기 (조회순)
-	public List<Board> getAllBoardListByViewCount() {
-		return boardDao.getAllBoardListByViewCount();
+	// 페이지용 게시물 더보기 (최신순, 조회순)
+	public JSONObject getMoreBoardPageList(Board board) {
+		JSONObject result = new JSONObject();
+		board.setPageInfo(boardDao.getTotalCount(board));
+		System.out.println(board);
+		
+		switch (board.getOrder()) {
+		case "recent": {
+			result.put("boardList", boardDao.getMoreBoardPageList(board));
+			break;
+		}
+		case "view": {
+			result.put("boardList", boardDao.getMoreBoardPageListByViewCount(board));
+			break;
+		}
+		}
+		
+		return result;
+	}
+	
+	// 페이지용 게시물 가져오기 (조회순)
+	public Map<String, Object> getAllBoardPageListByViewCount(Board board) {
+		Map<String, Object> result = new HashMap<>();
+		board.setPageInfo(boardDao.getTotalCount(board));
+		System.out.println(board);
+		result.put("board", board);
+		result.put("boardList", boardDao.getAllBoardPageListByViewCount(board));
+		
+		return result;
 	}
 
 	// 글 작성
 	public JSONObject write(Board board) {
 		JSONObject result = new JSONObject();
 		
-		if (boardDao.writeBoard(board.getTitle(), board.getContents(), board.getWriter_uid()) > 0) {
+		if (boardDao.writeBoard(board) > 0) {
 			result.put("message", "글 작성이 완료되었습니다.");
 			result.put("status", true);
 		} else {
@@ -93,14 +141,13 @@ public class BoardService {
 		
 		return result;
 	}
-	
+
 	// 글 수정
 	public JSONObject update(Board board) {
 		JSONObject result = new JSONObject();
 		
-		if (boardDao.updateBoard(board.getBoardid(), board.getTitle(), board.getContents()) > 0) {
+		if (boardDao.updateBoard(board) > 0) {
 			result.put("message", "글 수정이 완료되었습니다.");
-			result.put("location", "detailBoard.do?boardid=" + board.getBoardid());
 			result.put("status", true);
 		} else {
 			result.put("message", "글 수정에 실패하였습니다.");
@@ -114,7 +161,7 @@ public class BoardService {
 	public JSONObject delete(Board board) {
 		JSONObject result = new JSONObject();
 		
-		if (boardDao.deleteBoard(board.getBoardid()) > 0) {
+		if (boardDao.deleteBoard(board) > 0) {
 			result.put("message", "글 삭제가 완료되었습니다.");
 			result.put("status", true);
 		} else {
@@ -126,10 +173,10 @@ public class BoardService {
 	}
 	
 	// 선택 글 삭제 (관리자)
-	public JSONObject deletes(String deleteBoards, String order) {
+	public JSONObject deletes(Board board) {
 		JSONObject result = new JSONObject();
 		
-		if (boardDao.deleteBoards(deleteBoards) > 0) {
+		if (boardDao.deleteBoards(board) > 0) {
 			result.put("message", "선택한 글 삭제가 완료되었습니다.");
 			result.put("status", true);
 		}

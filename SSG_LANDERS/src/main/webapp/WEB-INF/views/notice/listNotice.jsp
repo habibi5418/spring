@@ -154,7 +154,7 @@
 					order: "recent"
 			}
 			
-			fetch("detailNotice.do", {
+			fetch("<c:url value='/notice/detailNotice.do'/>", {
 				method: "POST",
 				headers: {
 				    "Content-Type": "application/json; charset=UTF-8",

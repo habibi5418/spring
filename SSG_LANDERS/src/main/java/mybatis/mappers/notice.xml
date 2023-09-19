@@ -258,10 +258,13 @@
 		)}
 	</select>
 	
-	<select id="deleteNotices">
+	<update id="deleteNotices">
 		update notice 
 		set delete_yn = 'Y' 
-		where noticeid in(#{deleteNotices})
-	</select>
+		where noticeid in
+		<foreach collection="deleteNotices" item="item" index="index" open="(" close=")" separator=",">
+			#{item}
+		</foreach>	
+	</update>
 	
 </mapper>

@@ -14,12 +14,14 @@ public class Member implements Serializable {
 	private String mname;
 	private String pwd;
 	private String phone;
+	private String email;
 	
-	public Member(String memid, String mname, String pwd, String phone) {
+	public Member(String memid, String mname, String pwd, String phone, String email) {
 		this.memid = memid;
 		this.mname = mname;
 		this.pwd = pwd;
 		this.phone = phone;
+		this.email = email;
 	}
 	
 	@Override

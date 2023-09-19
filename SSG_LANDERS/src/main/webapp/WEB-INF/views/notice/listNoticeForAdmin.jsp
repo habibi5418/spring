@@ -502,19 +502,17 @@
     	// 체크 삭제
     	document.querySelector("#listDeleteButton").addEventListener("click", function() {
       		if (confirm("선택한 게시물들을 삭제하시겠습니까 ?")) {
-        		var deleteNotices = "";
+        		var deleteNotices = [];
         		var checks2 = document.querySelectorAll(".checkNotice:checked");
         		var cnt = checks2.length;
         		
         		checks2.forEach(checkbox => {
-        				deleteNotices += checkbox.value + ",";
-        		});
+        			deleteNotices.push(checkbox.value);
+    			});
         		
         		if (deleteNotices == "") {
         			alert("삭제할 게시물을 체크해주세요.");
         		} else {
-            		deleteNotices = deleteNotices.substr(0, deleteNotices.length - 1);
-            		
             		const param = {
             				deleteNotices: deleteNotices
         			}

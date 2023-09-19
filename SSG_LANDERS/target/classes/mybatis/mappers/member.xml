@@ -10,4 +10,48 @@
 	   	from member 
 	   	where memid = #{memid} and pwd = #{pwd}
     </select>
+    
+    <select id="existMemid" resultType="Member">
+	   	select * 
+	   	from member 
+	   	where memid = #{memid}
+    </select>
+    
+    <insert id="insertMember">
+	   	insert into member(memid, mname, pwd, phone, email) 
+	   	values(#{memid}, #{mname}, #{pwd}, #{phone}, #{email})
+    </insert>
+    
+    <select id="getMemidByMnamePhone" resultType="Member">
+	   	select * 
+	   	from member 
+	   	where mname = #{mname} and phone = #{phone}
+    </select>
+    
+    <select id="getPwdByMemidMname" resultType="Member">
+	   	select * 
+	   	from member 
+	   	where memid = #{memid} 
+	   	and mname = #{mname}
+    </select>
+    
+    <update id="updateMember">
+	   	update member 
+	   	set mname = #{mname}, 
+	   		pwd = #{pwd}, 
+	   		phone = #{phone}, 
+	   		email = #{email} 
+	   	where memid = #{memid}
+    </update>
+    
+    <delete id="deleteMember">
+	   	delete from member 
+	   	where memid = #{memid} and pwd = #{pwd}
+    </delete>
+    
+    <select id="getAllMemberList" resultType="Member">
+	   	select * 
+	   	from member 
+    </select>
+    
 </mapper>

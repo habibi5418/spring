@@ -136,14 +136,5 @@ public class MemberController {
 	 	
 		return jsonResult.toString();
 	}
-
-	@ResponseBody
-	@RequestMapping(value="/member/allMemberPrint.do", produces = "application/text; charset=UTF-8")
-	public String allMemberPrint(HttpServletRequest request, HttpServletResponse response) {
-		System.out.println("allMemberPrint()");
-
-	 	request.setAttribute("memberList", memberService.allMemberPrint()); 
-		
-		return "member/allMemberPrint.jsp";
-	}
+	
 }

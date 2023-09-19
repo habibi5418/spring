@@ -8,10 +8,15 @@ public interface BoardDao {
 	List<Board> getAllBoardList();
 	List<Board> getAllBoardListByViewCount();
 	Board getBoardByBoardid(int boardid);
-	int writeBoard(String title, String contents, String writer_uid);
-	int updateBoard(int boardid, String title, String contents);
-	int deleteBoard(int boardid);
-	int deleteBoards(String deleteBoards);
+	int writeBoard(Board board);
+	int updateBoard(Board board);
+	int deleteBoard(Board board);
+	int deleteBoards(Board board);
 	List<Board> findRecent5();
+	int getTotalCount(Board board);
+	List<Board> getAllBoardPageList(Board board);
+	List<Board> getMoreBoardPageList(Board board);
+	List<Board> getMoreBoardPageListByViewCount(Board board);
+	List<Board> getAllBoardPageListByViewCount(Board board);
 	void increaseViews(int boardid);
 }

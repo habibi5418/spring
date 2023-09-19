@@ -501,19 +501,17 @@
     	// 체크 삭제
     	document.querySelector("#listDeleteButton").addEventListener("click", function() {
       		if (confirm("선택한 게시물들을 삭제하시겠습니까 ?")) {
-        		var deleteNotices = "";
+      			var deleteNotices = [];
         		var checks2 = document.querySelectorAll(".checkNotice:checked");
         		var cnt = checks2.length;
         		
         		checks2.forEach(checkbox => {
-        				deleteNotices += checkbox.value + ",";
-        		});
+        			deleteNotices.push(checkbox.value);
+    			});
         		
-        		if (deleteNotices == "") {
+        		if (deleteNotices.length == 0) {
         			alert("삭제할 게시물을 체크해주세요.");
         		} else {
-            		deleteNotices = deleteNotices.substr(0, deleteNotices.length - 1);
-            		
             		const param = {
             				deleteNotices: deleteNotices
         			}
@@ -530,15 +528,24 @@
         			.then((json) => {
         				alert(json.message);
         				if (json.status) {
+        					noticeid = document.querySelector("#noticeTbody > tr:last-child > td:nth-child(2)").innerText;
         					view_count = document.querySelector("#noticeTbody > tr:last-child > td:nth-child(6)").innerText;
-	                		
+
+        			    	var currentNotices = [];
+        					current = document.querySelectorAll("#noticeTbody > tr > td:nth-child(2)");
+        					current.forEach(notice => {
+        						currentNotices.push(notice.innerText);
+        					});
+        					
 	        				$("#allCheck").prop("checked", false);
 	                		checks2.forEach(checkbox => {
 	            				checkbox.parentElement.parentElement.remove();
 	            			});	
 	        				
 	        	    		const param2 = {
+		        	    		noticeid: noticeid,
 	        	    			view_count: view_count,
+	        	    			currentNotices: currentNotices,
 	        	    			searchType: document.querySelector("#pageForm > #searchType").value,
 	        		    		searchText: document.querySelector("#pageForm > #searchText").value,
 	        		    		pageLength: cnt,

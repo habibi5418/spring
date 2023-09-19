@@ -103,8 +103,14 @@ public class MemberService {
 			jsonResult.put("message", newMember.getMemid() + "님의 정보가 성공적으로 수정되었습니다."
 					+ "\n비밀번호 : " + oldMember.getPwd() + " -> " + newMember.getPwd()
 					+ "\n이름 : " + oldMember.getMname() + " -> " + newMember.getMname()
-					+ "\n전화번호 : " + oldMember.getPhone() + " -> " + newMember.getPhone());
+					+ "\n전화번호 : " + oldMember.getPhone() + " -> " + newMember.getPhone()
+					+ "\n이메일 : " + oldMember.getEmail() +  " -> " + newMember.getEmail());
 			jsonResult.put("status", true);
+			jsonResult.put("memid", newMember.getMemid());
+			jsonResult.put("pwd", newMember.getMemid());
+			jsonResult.put("mname", newMember.getMname());
+			jsonResult.put("phone", newMember.getPhone());
+			jsonResult.put("email", newMember.getEmail());
     	} else {
     		jsonResult.put("message", "정보 수정에 실패했습니다.");
     		jsonResult.put("status", false);

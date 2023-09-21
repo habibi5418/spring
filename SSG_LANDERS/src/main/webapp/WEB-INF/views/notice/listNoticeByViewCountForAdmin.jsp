@@ -408,10 +408,19 @@
 	    	document.querySelector("#moreList").addEventListener("click", e => {
 	    		e.preventDefault();
 	
+				noticeid = document.querySelector("#noticeTbody > tr:last-child > td:nth-child(2)").innerText;
 				view_count = document.querySelector("#noticeTbody > tr:last-child > td:nth-child(6)").innerText;
+
+		    	var currentNotices = [];
+				current = document.querySelectorAll("#noticeTbody > tr > td:nth-child(2)");
+				current.forEach(notice => {
+					currentNotices.push(notice.innerText);
+				});
 				
-	    		const param = {
-		    		view_count: view_count,
+	    		const param2 = {
+	    			noticeid: noticeid,
+	    			view_count: view_count,
+	    			currentNotices: currentNotices,
 	    			searchType: document.querySelector("#pageForm > #searchType").value,
 		    		searchText: document.querySelector("#pageForm > #searchText").value,
 		    		pageLength: document.querySelector("#pageForm > #pageLength").value,

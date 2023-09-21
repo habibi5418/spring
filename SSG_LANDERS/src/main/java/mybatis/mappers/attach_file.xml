@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+      PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mapper.attach_file">
+	
+	<resultMap type="AttachFile" id="attachResultMap">
+		<result property="fileNameOrg" column="file_name_org"/>
+		<result property="fileNameReal" column="file_name_real"/>
+		<result property="contentType" column="content_type"/>
+	</resultMap>
+	
+	<select id="getList" resultMap="attachResultMap">
+		select 
+			  fileNo			
+			, boardId			
+			, file_Name_Org 	
+			, file_Name_real 	
+			, length				
+			, content_type			
+			, reg_date			 
+		from attach_file
+		where boardid = #{boardid} 
+		order by fileNo 
+	</select>
+	
+
+	<select id="getAttachFile" resultMap="attachResultMap">
+		select 
+			  fileNo			
+			, boardId			
+			, file_Name_Org 	
+			, file_Name_real 	
+			, length				
+			, content_type			
+			, reg_date			 
+		from attach_file
+		where fileNo = #{fileNo} 
+		order by fileNo 
+	</select>
+	
+	<insert id="insert" >
+		insert into attach_file (
+			  fileNo			
+			, boardId			
+			, file_Name_Org 	
+			, file_Name_real 	
+			, length				
+			, content_type			
+		) values (
+			  FILE_NO_SEQ.nextval
+			, #{boardid     }
+			, #{fileNameOrg }
+			, #{fileNameReal}
+			, #{length	    }
+			, #{contentType }	
+		)
+	</insert>
+	
+</mapper>

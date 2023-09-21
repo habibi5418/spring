@@ -1,5 +1,8 @@
 package com.kosa.ssg.board.domain;
 
+import java.util.List;
+
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,6 +20,11 @@ public class Board {
 	private int view_count;
 	private String delete_yn;
 	private int pid;
+	private int level;
+	
+	private int replyid;
+
+	private List<AttachFile> attacheFileList;
 	
 	private String order;
 	private String[] deleteBoards;

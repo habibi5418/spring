@@ -1,8 +1,6 @@
 package com.kosa.ssg.board.dao;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,5 +97,41 @@ public class BoardDaoImpl implements BoardDao {
 	@Override
 	public void increaseViews(int boardid) {
 		sqlSession.update("mapper.board.increaseViews", boardid);
+	}
+	
+	// 답글 작성
+	@Override
+	public int replyBoard(Board board) {
+		return sqlSession.insert("mapper.board.replyBoard", board);
+	}
+	
+	// 댓글 작성
+	@Override
+	public int commentBoard(Board board) {
+		return sqlSession.insert("mapper.board.commentBoard", board);
+	}
+	
+	// 댓글 가져오기
+	@Override
+	public List<Board> getCommentBoard(Board board) {
+		return sqlSession.selectList("mapper.board.getCommentBoard", board);
+	}
+	
+	// 작성한 댓글 가져오기
+	@Override
+	public List<Board> getWriteComment(Board board) {
+		return sqlSession.selectList("mapper.board.getWriteComment", board);
+	}
+	
+	// 댓글 수정
+	@Override
+	public int updateComment(Board board) {
+		return sqlSession.update("mapper.board.updateComment", board);
+	}
+	
+	// 댓글 삭제
+	@Override
+	public int deleteComment(Board board) {
+		return sqlSession.delete("mapper.board.deleteComment", board);
 	}
 }

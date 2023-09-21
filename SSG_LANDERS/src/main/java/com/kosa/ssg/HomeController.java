@@ -10,9 +10,6 @@ import com.kosa.ssg.board.service.BoardService;
 import com.kosa.ssg.member.service.MemberService;
 import com.kosa.ssg.notice.service.NoticeService;
 
-/**
- * Handles requests for the application home page.
- */
 @Controller
 public class HomeController {
 

@@ -6,7 +6,7 @@
 	<typeAliases>
 		<typeAlias type="com.kosa.ssg.member.domain.Member"  alias="Member" />
 		<typeAlias type="com.kosa.ssg.board.domain.Board"  alias="Board" />
-<!-- 		<typeAlias type="com.kosa.ssg.board.domain.AttachFile"  alias="AttachFile" /> -->
+		<typeAlias type="com.kosa.ssg.board.domain.AttachFile"  alias="AttachFile" />
 		<typeAlias type="com.kosa.ssg.notice.domain.Notice"  alias="Notice" />
 	</typeAliases>
 </configuration>

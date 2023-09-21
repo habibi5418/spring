@@ -42,9 +42,14 @@
 	    from ( 
 	        select rownum nrow, n.* 
 	        from ( 
-				select * 
+				select level, pid, boardid, title, writer_uid, reg_date, view_count 
 				from board 
 				where delete_yn = 'N' 
+				<if test="boardid != 0">
+					<![CDATA[
+						and boardid > #{boardid}
+					]]>
+				</if>
 		    	<if test="searchText != '' and searchText != null">
 			    	<choose>
 				    	<when test="searchType == 'title'">
@@ -58,7 +63,9 @@
 				    	</when>
 			    	</choose>
 			    </if>
-				order by boardid desc 
+			    start with pid=0
+				CONNECT BY PRIOR boardid = pid
+				order SIBLINGS by boardid desc  
 			) n 
 			<![CDATA[
 			where rownum <= #{endNo}
@@ -72,9 +79,14 @@
 	    from ( 
 	        select rownum nrow, n.* 
 	        from ( 
-				select * 
+				select level, pid, boardid, title, writer_uid, reg_date, view_count 
 				from board 
 				where delete_yn = 'N' 
+				<if test="boardid != 0">
+					<![CDATA[
+						and boardid > #{boardid}
+					]]>
+				</if>
 		    	<if test="searchText != '' and searchText != null">
 			    	<choose>
 				    	<when test="searchType == 'title'">
@@ -88,7 +100,9 @@
 				    	</when>
 			    	</choose>
 			    </if>
-				order by view_count desc, boardid desc 
+			    start with pid=0
+				CONNECT BY PRIOR boardid = pid
+				order SIBLINGS by view_count desc, boardid desc  
 			) n 
 			<![CDATA[
 			where rownum <= #{endNo}
@@ -224,5 +238,62 @@
 			#{item}
 		</foreach>	
 	</update>
+	
+	<insert id="replyBoard">
+		insert into board(boardid, title, contents, writer_uid, pid)
+    	VALUES (seq_board.nextval, #{title}, #{contents}, #{writer_uid}, #{pid})
+	</insert>
+	
+	<insert id="commentBoard">
+		insert into reply_comment(replyid, boardid, contents, writer_uid, reg_date)
+    	VALUES (seq_comment.nextval, #{boardid}, #{contents}, #{writer_uid}, sysdate)
+	</insert>
+	
+	<select id="getCommentBoard" resultType="Board">
+		select rownum nrow, n.* 
+		from (
+            select * 
+            from reply_comment 
+			where boardid = #{boardid}
+            <if test="replyid != 0">
+			    <![CDATA[
+	            and replyid < #{replyid}
+        		]]>
+            </if>
+            order by replyid desc 
+        ) n 
+	    <![CDATA[
+        where rownum <= 10
+        ]]>
+	</select>
+	
+	<select id="getWriteComment" resultType="Board">
+		select rownum nrow, n.* 
+		from (
+            select * 
+            from reply_comment 
+			where boardid = #{boardid}
+            <if test="replyid != 0">
+			    <![CDATA[
+	            and replyid < #{replyid}
+        		]]>
+            </if>
+            order by replyid desc 
+        ) n 
+	    <![CDATA[
+        where rownum <= 1
+        ]]>
+	</select>
+	
+	<update id="updateComment">
+		update reply_comment
+		set contents = #{contents}, reg_date = sysdate 
+    	where replyid = #{replyid}
+	</update>
+	
+	<delete id="deleteComment">
+		delete from reply_comment
+    	where replyid = #{replyid}
+	</delete>
 	
 </mapper>

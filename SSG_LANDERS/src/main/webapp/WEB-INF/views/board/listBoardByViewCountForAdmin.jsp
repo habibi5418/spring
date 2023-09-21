@@ -3,7 +3,9 @@
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 	    <div id="listContainer">
  			<a href="<c:url value='/board/listBoardForAdmin.do'/>" id="listByRecentButton" class="detailBtns">최신순</a>
-	    	<button type="button" id="listWriteButton">글작성</button>
+	    	<c:if test="${loginMember != null}">
+				<button type="button" id="listWriteButton">글작성</button>
+ 			</c:if>
 			<a id="listDeleteButton" class="detailBtns">삭제</a>
 	    	
 			<table class="table">
@@ -11,7 +13,7 @@
 					<tr id="boardTemp" style="display: none;">
 						<td><input type='checkbox' id="checkBoardidTemp" class="checkBoard" value=""></td>
 						<td id="boardidTemp"></td>
-						<td>
+						<td id="titleTd">
 							<a onclick="detailBoard(this.getAttribute('data-boardid'))" href="#" id="title" data-boardid="{boardid}"></a>
 						</td>
 						<td id="writer_uid"></td>
@@ -31,7 +33,9 @@
 							<tr>
 							<td><input type='checkbox' class="checkBoard" value='${board.getBoardid() }'></td>
 								<td id="boardid">${board.getBoardid() }</td>
-								<td>
+								<td id="boardTbodyTitle">
+									<span style="padding-left: ${(board.level - 1) * 20}px"></span>
+									${board.level != 1 ? "ㄴ " : ""}
 									<a onclick="detailBoard(this.getAttribute('data-boardid'))" href="#" data-boardid="${board.boardid}">
 										${board.title }
 									</a>
@@ -87,7 +91,7 @@
 				<input type="hidden" id="pageLength" name="pageLength" value="${result.board.pageLength }"/>
 			</form>
 			
-			<div id="detail-form" class="dialog-form" title="공지사항 상세보기">
+			<div id="detail-form" class="dialog-form" title="게시물 상세보기">
 				<div id="detailContainer">
 					<div id="detailBoard">
 						<input type="hidden" id="detailBoardid" value="">
@@ -97,7 +101,20 @@
 						    <p id="detailDateText" class="date"></p>
 					    </div>
 					    <p id="detailContentsText" class="contents"></p>
+			    		<div id="commentForm">
+					    	<hr>
+			    			<label id="commentLabel" for="commentContents">댓글</label>
+			    			<div id="commentList"></div>
+							<div id="moreCommentDiv">
+								<a href="#" id="moreCommentList">더보기</a>
+							</div>
+							<textarea name="commentContents" id="commentContents" class="commentContents" rows="8" placeholder="댓글을 입력하세요." required class="text ui-widget-content ui-corner-all"></textarea>
+							<input id="writeComment" type="button" onclick="writeComment()" value="댓글 등록" />
+						</div>
 				  	</div>
+				  	<c:if test="${loginMember != null}">
+			    		<a id="replyButton" class="detailBtns">답글</a>
+			    	</c:if>
 		    		<a href="#" onclick="detailBoard(this.getAttribute('data-boardid'))" data-boardid="{boardid}" id="prevlistButton" class="detailBtns">이전글</a>
 		    		<a href="#" onclick="detailBoard(this.getAttribute('data-boardid'))" data-boardid="{boardid}" id="nextlistButton" class="detailBtns">다음글</a>
 		    		<div id="btnForWriter">
@@ -129,6 +146,17 @@
 				</form>
 			</div>
 			
+			<div id="reply-form" class="dialog-form" title="답글 작성 폼">
+				<form method="post" autocomplete="off">
+					<fieldset>
+						<label for="replyTitle">글 제목</label>
+						<input type="text" name="replyTitle" id="replyTitle" class="text ui-widget-content ui-corner-all" placeholder="제목을 입력하세요." required>
+						<label for="replyContents">글 내용</label>
+						<textarea name="replyContents" id="replyContents" class="writeContents" rows="8" placeholder="내용을 입력하세요." required class="text ui-widget-content ui-corner-all"></textarea>
+					</fieldset>
+				</form>
+			</div>
+			
 		</div>
     
     <script>
@@ -152,7 +180,7 @@
 	    	
 	    	$("#detail-form").dialog({
 	            autoOpen: false,
-	            height: 700,
+	            height: 900,
 	            width: 1200,
 	            modal: true,
 	            buttons: {
@@ -164,6 +192,8 @@
 	            	detailContentsText.text("");
 	            	prevlistButton.css("display", "block");
 					nextlistButton.css("display", "block");
+					commentList.text("");
+					commentContents.val("");
 	            }
 	        });
 	    	
@@ -181,6 +211,27 @@
 	            close: function() {
 	            }
 	        });
+	    	
+	    	$("#reply-form").dialog({
+	            autoOpen: false,
+	            height: 700,
+	            width: 1200,
+	            modal: true,
+	            buttons: {
+	                "작성": replyBoard,
+	                "취소": function() {
+	                	$("#reply-form").dialog("close");
+	                },
+	                close: function() {
+		            	replyTitle.val("");
+		            	replyContents.val("");
+		            }
+	            },
+	            close: function() {
+	            	replyTitle.val("");
+	            	replyContents.val("");
+	            }
+	        });
 	    });
 	    
         var writeTitle = $("#writeTitle"),
@@ -196,7 +247,11 @@
 	    	updateButton = $("#updateButton"),
 	    	deleteButton = $("#deleteButton"),
 	    	updateTitle = $("#updateTitle"),
-	    	updateContents = $("#updateContents");
+	    	updateContents = $("#updateContents"),
+	    	replyTitle = $("#replyTitle"),
+			replyContents = $("#replyContents"),
+			commentContents = $("#commentContents"),
+			commentList = $("#commentList");
 		
      	// 다이얼로그 오픈
         $("#listWriteButton").button().on("click", function() {
@@ -206,7 +261,7 @@
         updateButton.on("click", function() {
         	const param = {
 					boardid: detailBoardid.val(),
-					order: "view"
+					order: "recent"
 			}
 			
 			fetch("<c:url value='/board/getBeforeBoard.do'/>", {
@@ -223,6 +278,10 @@
 			});
         	
         	$("#update-form").dialog("open");
+        });
+        
+        $("#replyButton").on("click", function() {
+        	$("#reply-form").dialog("open");
         });
         
      	// 글 작성
@@ -254,9 +313,9 @@
 	    function detailBoard(boardid) {
 			const param = {
 					boardid: boardid,
-					order: "view"
+					order: "recent"
 			}
-
+			
 			fetch("<c:url value='/board/detailBoard.do'/>", {
 				method: "POST",
 				headers: {
@@ -288,6 +347,79 @@
 					
 					btnForWriter.css("display", "block");
 					if ("${loginMember.memid}" !=  json.writer_uid) btnForWriter.css("display", "none");
+					
+					// 댓글 불러오기 
+					const param2 = {
+						replyid: 0,
+       	    			boardid: detailBoardid.val()
+       	    		}
+       	    		
+       	    		fetch("<c:url value='/board/getCommentBoard.do'/>", {
+       					method: "POST",
+       					headers: {
+       					    "Content-Type": "application/json; charset=UTF-8",
+       					},
+       					body: JSON.stringify(param2),
+       				})
+       				.then((response) => response.json())
+       				.then((json) => {
+       					const commentList = json.commentList;
+       					const commentListHTML = document.querySelector("#commentList");
+       					const moreCommentDiv = $("#moreCommentDiv");
+       					
+       					commentListHTML.innerHTML = "";
+       					
+       					for (let i = 0; i < commentList.length; i++) {
+       						const comment = commentList[i];
+       						
+       						let createDivTag = document.createElement('div');
+       						let createCommentReplyid = document.createElement('input');
+       						let createCommentWriter = document.createElement('h3');
+       						let createCommentContents = document.createElement('p');
+       						let createCommentRegDate = document.createElement('p');
+       						
+       						createDivTag.setAttribute("id", "commentDiv");
+
+       						createCommentReplyid.setAttribute("id", "commentReplyid");
+       						createCommentReplyid.setAttribute("type", "hidden");
+       						createCommentReplyid.setAttribute("value", comment.replyid);
+       						
+       						createCommentWriter.setAttribute("id", "commentWriter");
+       						createCommentWriter.innerHTML = comment.writer_uid;
+       						
+       						createCommentContents.setAttribute("id", "commentContents");
+       						createCommentContents.innerHTML = comment.contents;
+       						
+       						createCommentRegDate.setAttribute("id", "commentRegDate");
+      						createCommentRegDate.innerHTML = comment.reg_date;
+       						
+       						createDivTag.appendChild(createCommentReplyid);
+       						createDivTag.appendChild(createCommentWriter);
+       						createDivTag.appendChild(createCommentContents);
+       						createDivTag.appendChild(createCommentRegDate);
+
+       						if ("${loginMember.memid}" == comment.writer_uid) {
+       	   						let createCommentUpdateBtn = document.createElement('a');
+       	   						let createCommentDeleteBtn = document.createElement('a');
+       	   						createCommentUpdateBtn.setAttribute("id", "commentUpdateBtn");
+       	   						createCommentDeleteBtn.setAttribute("id", "commentDeleteBtn");
+       	   						createCommentUpdateBtn.href = "#";
+       	   						createCommentDeleteBtn.href = "#";
+       	   						createCommentUpdateBtn.setAttribute("onclick", "commentUpdate(this)");
+       	   						createCommentDeleteBtn.setAttribute("onclick", "commentDelete(" + comment.replyid + ")");
+       	   						createCommentUpdateBtn.innerText = "댓글 수정";
+       	   						createCommentDeleteBtn.innerText = "댓글 삭제";
+       	   						createDivTag.appendChild(createCommentUpdateBtn);
+       	   						createDivTag.appendChild(createCommentDeleteBtn);
+       						}	
+       						
+       						commentListHTML.append(createDivTag);
+       					}
+   						
+   						moreCommentDiv.css("display", "none");
+   						if (json.cnt == 10) moreCommentDiv.css("display", "block");
+   						
+       				});
 					
 					$("#detail-form").dialog("open");
 				}
@@ -341,6 +473,200 @@
     			});
       		}
       	});
+        
+     	// 답글 작성
+		function replyBoard() {
+			const param = {
+					title: replyTitle.val(),
+					contents: replyContents.val(),
+					writer_uid: '${loginMember.memid}',
+					pid: detailBoardid.val()
+			}
+			
+			fetch("<c:url value='/board/replyBoard.do'/>", {
+				method: "POST",
+				headers: {
+				    "Content-Type": "application/json; charset=UTF-8",
+				},
+				body: JSON.stringify(param),
+			})
+			.then((response) => response.json())
+			.then((json) => {
+				alert(json.message);
+				if (json.status) {
+					$("#pageNo").val("1");
+					$("#pageForm").submit();
+				}
+			});
+		}    
+		
+     	// 댓글 작성
+     	function writeComment() {
+     		const param = {
+					contents: commentContents.val(),
+					writer_uid: '${loginMember.memid}',
+					boardid: detailBoardid.val()
+			}
+			
+			fetch("<c:url value='/board/commentBoard.do'/>", {
+				method: "POST",
+				headers: {
+				    "Content-Type": "application/json; charset=UTF-8",
+				},
+				body: JSON.stringify(param),
+			})
+			.then((response) => response.json())
+			.then((json) => {
+				alert(json.message);
+				if (json.status) {
+					commentContents.val("");
+					detailBoard(detailBoardid.val());
+				}
+			});
+     	}    
+		
+     	// 댓글 더보기
+     	document.querySelector("#moreCommentList").addEventListener("click", function() {
+			const lastReplyid = document.querySelector("#commentList > div:last-child > input:first-child").value;
+			
+			const param2 = {
+				replyid: lastReplyid,
+    			boardid: detailBoardid.val()
+    		}
+       	    		
+	   		fetch("<c:url value='/board/getCommentBoard.do'/>", {
+				method: "POST",
+				headers: {
+				    "Content-Type": "application/json; charset=UTF-8",
+				},
+				body: JSON.stringify(param2),
+			})
+			.then((response) => response.json())
+			.then((json) => {
+				const commentList = json.commentList;
+				const commentListHTML = document.querySelector("#commentList");
+				const moreCommentDiv = $("#moreCommentDiv");
+				
+				for (let i = 0; i < commentList.length; i++) {
+					const comment = commentList[i];
+					
+					let createDivTag = document.createElement('div');
+					let createCommentReplyid = document.createElement('input');
+					let createCommentWriter = document.createElement('h3');
+					let createCommentContents = document.createElement('p');
+					let createCommentRegDate = document.createElement('p');
+					
+					createDivTag.setAttribute("id", "commentDiv");
+
+					createCommentReplyid.setAttribute("id", "commentReplyid");
+					createCommentReplyid.setAttribute("type", "hidden");
+					createCommentReplyid.setAttribute("value", comment.replyid);
+					
+					createCommentWriter.setAttribute("id", "commentWriter");
+					createCommentWriter.innerHTML = comment.writer_uid;
+					
+					createCommentContents.setAttribute("id", "commentContents");
+					createCommentContents.innerHTML = comment.contents;
+					
+					createCommentRegDate.setAttribute("id", "commentRegDate");
+					createCommentRegDate.innerHTML = comment.reg_date;
+					
+					createDivTag.appendChild(createCommentReplyid);
+					createDivTag.appendChild(createCommentWriter);
+					createDivTag.appendChild(createCommentContents);
+					createDivTag.appendChild(createCommentRegDate);
+					
+					if ("${loginMember.memid}" == comment.writer_uid) {
+   						let createCommentUpdateBtn = document.createElement('a');
+   						let createCommentDeleteBtn = document.createElement('a');
+   						createCommentUpdateBtn.setAttribute("id", "commentUpdateBtn");
+   						createCommentDeleteBtn.setAttribute("id", "commentDeleteBtn");
+   						createCommentUpdateBtn.href = "#";
+   						createCommentDeleteBtn.href = "#";
+   						createCommentUpdateBtn.setAttribute("onclick", "commentUpdate(this)");
+   						createCommentDeleteBtn.setAttribute("onclick", "commentDelete(" + comment.replyid + ")");
+   						createCommentUpdateBtn.innerText = "댓글 수정";
+   						createCommentDeleteBtn.innerText = "댓글 삭제";
+   						createDivTag.appendChild(createCommentUpdateBtn);
+   						createDivTag.appendChild(createCommentDeleteBtn);
+					}	
+						
+					commentListHTML.append(createDivTag);
+					
+					moreCommentDiv.css("display", "block");
+					if (json.cnt != 10) moreCommentDiv.css("display", "none");
+				}
+				
+				if (!json.check) moreCommentDiv.css("display", "none");
+				
+			});
+     	});
+     	
+     	// 댓글 수정창 오픈
+     	function commentUpdate(updateBtn) {
+     		let commentDiv = updateBtn.parentNode;
+			let createCommentUpdateArea = document.createElement("textarea");
+			let createCommentUpdateInput = document.createElement("input");
+			
+			createCommentUpdateArea.setAttribute("id", "updateCommentContents");
+			createCommentUpdateArea.setAttribute("placeholder", "수정할 댓글 내용으로 적어주세요.");
+			
+			createCommentUpdateInput.setAttribute("id", "updateComment");
+			createCommentUpdateInput.setAttribute("class", "detailBtns");
+			createCommentUpdateInput.setAttribute("type", "button");
+			createCommentUpdateInput.setAttribute("onclick", "updateComment(" + commentDiv.firstChild.value + ",this)");
+			createCommentUpdateInput.setAttribute("value", "댓글 수정");
+			
+			commentDiv.append(createCommentUpdateArea);
+			commentDiv.append(createCommentUpdateInput);
+     	}
+     	
+     	// 댓글 수정
+     	function updateComment(replyid, updateComment) {
+     		const param = {
+     				replyid: replyid,
+					contents: $("#updateCommentContents").val()
+			}
+     		
+			fetch("<c:url value='/board/updateComment.do'/>", {
+				method: "POST",
+				headers: {
+				    "Content-Type": "application/json; charset=UTF-8",
+				},
+				body: JSON.stringify(param),
+			})
+			.then((response) => response.json())
+			.then((json) => {
+				alert(json.message);
+				if (json.status) {
+					detailBoard(detailBoardid.val());
+				}
+			});
+     	}
+     	
+     	// 댓글 삭제
+     	function commentDelete(replyid) {
+     		if (confirm("댓글을 삭제하시겠습니까 ?")){
+     			const param = {
+         				replyid: replyid
+    			}
+         		
+    			fetch("<c:url value='/board/deleteComment.do'/>", {
+    				method: "POST",
+    				headers: {
+    				    "Content-Type": "application/json; charset=UTF-8",
+    				},
+    				body: JSON.stringify(param),
+    			})
+    			.then((response) => response.json())
+    			.then((json) => {
+    				alert(json.message);
+    				if (json.status) {
+    					detailBoard(detailBoardid.val());
+    				}
+    			});
+     		}
+     	}
 		
     	// 검색
 	    document.querySelector("#searchForm").addEventListener("submit", e => {

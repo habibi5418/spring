@@ -10,14 +10,19 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.kosa.ssg.board.dao.AttachFileDAO;
 import com.kosa.ssg.board.dao.BoardDao;
+import com.kosa.ssg.board.domain.AttachFile;
 import com.kosa.ssg.board.domain.Board;
 
 @Service
 public class BoardService {
-	
+
 	@Autowired
 	private BoardDao boardDao;
+	
+	@Autowired
+	private AttachFileDAO attachFileDao;
 	
 	// 최근 게시물 5개 가져오기
 	public List<Board> recent() {
@@ -76,7 +81,7 @@ public class BoardService {
 				result.put("nextBoardid", boardList.get(idx - 1).getBoardid());
 	    	}
 		}
-		
+		System.out.println("상세페이지 : " + result);
 		return result;
 	}
 	
@@ -139,6 +144,13 @@ public class BoardService {
 			result.put("status", false);
 		}
 		
+		if (board.getAttacheFileList() != null) {
+			for (AttachFile attachFile : board.getAttacheFileList()) {
+				attachFile.setBoardid(board.getBoardid());
+				attachFileDao.insert(attachFile);
+			}
+		}
+		
 		return result;
 	}
 
@@ -152,6 +164,13 @@ public class BoardService {
 		} else {
 			result.put("message", "글 수정에 실패하였습니다.");
 			result.put("status", false);
+		}
+		
+		if (board.getAttacheFileList() != null) {
+			for (AttachFile attachFile : board.getAttacheFileList()) {
+				attachFile.setBoardid(board.getBoardid());
+//				attachFileDao.update(attachFile);
+			}
 		}
 		
 		return result;
@@ -182,6 +201,97 @@ public class BoardService {
 		}
 		else {
 			result.put("message", "선택한 글 삭제에 실패하였습니다.");
+			result.put("status", false);
+		}
+		
+		return result;
+	}
+
+	// 답글 작성
+	public JSONObject reply(Board board) {
+		JSONObject result = new JSONObject();
+		
+		if (boardDao.replyBoard(board) > 0) {
+			result.put("message", "답글 작성이 완료되었습니다.");
+			result.put("status", true);
+		} else {
+			result.put("message", "답글 작성에 실패하였습니다.");
+			result.put("status", false);
+		}
+		
+		if (board.getAttacheFileList() != null) {
+			for (AttachFile attachFile : board.getAttacheFileList()) {
+				attachFile.setBoardid(board.getBoardid());
+				attachFileDao.insert(attachFile);
+			}
+		}
+		
+		return result;
+	}
+
+	// 댓글 작성
+	public JSONObject comment(Board board) {
+		JSONObject result = new JSONObject();
+		
+		if (boardDao.commentBoard(board) > 0) {
+			result.put("message", "댓글 작성이 완료되었습니다.");
+			result.put("status", true);
+		} else {
+			result.put("message", "댓글 작성에 실패하였습니다.");
+			result.put("status", false);
+		}
+		
+		return result;
+	}
+	
+	// 댓글 정보 가져오기
+	public JSONObject getComment(Board board) {
+		JSONObject result = new JSONObject();
+		
+		List<Board> commnetList = boardDao.getCommentBoard(board);
+		
+		result.put("commentList", commnetList);
+		result.put("cnt", commnetList.size());
+		result.put("check", commnetList.size() != 0 ? true : false);
+		System.out.println(result);
+		return result;
+	}
+	
+	// 작성한 댓글 정보 가져오기
+	public JSONObject getWriteComment(Board board) {
+		JSONObject result = new JSONObject();
+		
+		List<Board> commnetList = boardDao.getWriteComment(board);
+		
+		result.put("commentList", commnetList);
+		
+		return result;
+	}
+
+	// 댓글 수정
+	public JSONObject updateComment(Board board) {
+		JSONObject result = new JSONObject();
+		
+		if (boardDao.updateComment(board) > 0) {
+			result.put("message", "댓글 수정이 완료되었습니다.");
+			result.put("status", true);
+		} else {
+			result.put("message", "댓글 수정에 실패하였습니다.");
+			result.put("status", false);
+		}
+		
+		return result;
+	}
+
+	// 댓글 삭제
+	public JSONObject deleteComment(Board board) {
+		JSONObject result = new JSONObject();
+		
+		if (boardDao.deleteComment(board) > 0) {
+			result.put("message", "댓글 삭제가 완료되었습니다.");
+			result.put("status", true);
+		} else {
+			result.put("message", "댓글 삭제를 실패하였습니다.");
 			result.put("status", false);
 		}
 		

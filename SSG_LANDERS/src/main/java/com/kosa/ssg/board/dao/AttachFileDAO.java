@@ -11,5 +11,7 @@ public interface AttachFileDAO {
 	public List<AttachFile> getList(Board board) throws Exception;
 	public AttachFile getAttachFile(String fileNo);
 	public void insert(AttachFile attachFile);
+	public void update(AttachFile attachFile);
+	public void delete(int boardid);
 	
 }

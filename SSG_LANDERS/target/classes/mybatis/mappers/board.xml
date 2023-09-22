@@ -42,7 +42,7 @@
 	    from ( 
 	        select rownum nrow, n.* 
 	        from ( 
-				select level, pid, boardid, title, writer_uid, reg_date, view_count 
+				select level, pid, boardid, title, writer_uid, reg_date, view_count, exist_file existFile 
 				from board 
 				where delete_yn = 'N' 
 				<if test="boardid != 0">
@@ -79,7 +79,7 @@
 	    from ( 
 	        select rownum nrow, n.* 
 	        from ( 
-				select level, pid, boardid, title, writer_uid, reg_date, view_count 
+				select level, pid, boardid, title, writer_uid, reg_date, view_count, exist_file existFile 
 				from board 
 				where delete_yn = 'N' 
 				<if test="boardid != 0">
@@ -214,13 +214,19 @@
 	</select>
 	
 	<insert id="writeBoard">
-		insert into board(boardid, title, contents, writer_uid)
-    	VALUES (seq_board.nextval, #{title}, #{contents}, #{writer_uid})
+		insert into board(boardid, title, contents, writer_uid, exist_file)
+    	VALUES (seq_board.nextval, #{title}, #{contents}, #{writer_uid}, #{existFile})
 	</insert>
+	
+	<select id="getWriteBoard" resultType="Board">
+		select boardid 
+		from board
+		order by boardid desc
+	</select>
 	
 	<update id="updateBoard">
 		update board
-		set title = #{title}, contents = #{contents}, mod_date = sysdate
+		set title = #{title}, contents = #{contents}, mod_date = sysdate, exist_file = #{existFile}
 		where boardid = #{boardid}
 	</update>
 	
@@ -240,8 +246,8 @@
 	</update>
 	
 	<insert id="replyBoard">
-		insert into board(boardid, title, contents, writer_uid, pid)
-    	VALUES (seq_board.nextval, #{title}, #{contents}, #{writer_uid}, #{pid})
+		insert into board(boardid, title, contents, writer_uid, pid, existFile)
+    	VALUES (seq_board.nextval, #{title}, #{contents}, #{writer_uid}, #{pid}, #{existFile})
 	</insert>
 	
 	<insert id="commentBoard">

@@ -32,7 +32,7 @@ public class BoardController {
 	
 	@Autowired
 	private BoardService boardService;
-
+	
 	private static final String CURR_IMAGE_REPO_PATH = "C:\\file_repo";
 	
 	@ResponseBody
@@ -91,7 +91,7 @@ public class BoardController {
 	
 	@ResponseBody
 	@RequestMapping(value = "/board/writeBoard.do", produces = "application/text; charset=UTF-8")
-	public String writeBoard(@RequestBody Board board, MultipartHttpServletRequest multipartRequest, HttpServletRequest request, HttpServletResponse response) throws Exception {
+	public String writeBoard(Board board, MultipartHttpServletRequest multipartRequest, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		System.out.println("writeBoard() : " + board);
 
 		multipartRequest.setCharacterEncoding("UTF-8");
@@ -105,7 +105,7 @@ public class BoardController {
 			map.put(name, value);
 		}
 		
-		board.setAttacheFileList(fileProcess(multipartRequest));
+		board.setAttachFileList(fileProcess(multipartRequest));
 		
 		return boardService.write(board).toString();
 	}
@@ -127,7 +127,7 @@ public class BoardController {
 				file.mkdirs();
 			}
 
-			String fileNameReal = UUID.randomUUID().toString();
+			String fileNameReal = UUID.randomUUID().toString() + fileNameOrg.substring(fileNameOrg.lastIndexOf("."));
 			
 			//파일 저장 
 			mFile.transferTo(new File(file, fileNameReal)); //임시로 저장된 multipartFile을 실제 파일로 전송
@@ -154,7 +154,7 @@ public class BoardController {
 
 	@ResponseBody
 	@RequestMapping(value = "/board/updateBoard.do", produces = "application/text; charset=UTF-8")
-	public String updateBoard(@RequestBody Board board, MultipartHttpServletRequest multipartRequest, HttpServletRequest request, HttpServletResponse response) throws Exception {
+	public String updateBoard(Board board, MultipartHttpServletRequest multipartRequest, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		System.out.println("updateBoard()");
 
 		multipartRequest.setCharacterEncoding("UTF-8");
@@ -168,8 +168,8 @@ public class BoardController {
 			map.put(name, value);
 		}
 		
-		board.setAttacheFileList(fileProcess(multipartRequest));
-
+		board.setAttachFileList(fileProcess(multipartRequest));
+		
 		return boardService.update(board).toString();
 	}
 
@@ -191,7 +191,7 @@ public class BoardController {
 	
 	@ResponseBody
 	@RequestMapping(value = "/board/replyBoard.do", produces = "application/text; charset=UTF-8")
-	public String replyBoard(@RequestBody Board board, MultipartHttpServletRequest multipartRequest, HttpServletRequest request, HttpServletResponse response) throws Exception {
+	public String replyBoard(Board board, MultipartHttpServletRequest multipartRequest, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		System.out.println("replyBoard() : " + board);
 
 		multipartRequest.setCharacterEncoding("UTF-8");
@@ -205,7 +205,7 @@ public class BoardController {
 			map.put(name, value);
 		}
 		
-		board.setAttacheFileList(fileProcess(multipartRequest));
+		board.setAttachFileList(fileProcess(multipartRequest));
 		
 		return boardService.reply(board).toString();
 	}

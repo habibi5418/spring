@@ -49,7 +49,7 @@
 			, length				
 			, content_type			
 		) values (
-			  FILE_NO_SEQ.nextval
+			  SEQ_FILE.nextval
 			, #{boardid     }
 			, #{fileNameOrg }
 			, #{fileNameReal}
@@ -57,5 +57,10 @@
 			, #{contentType }	
 		)
 	</insert>
+	
+	<delete id="delete">
+		delete from attach_file 
+		where boardid = #{boardid}
+	</delete>
 	
 </mapper>

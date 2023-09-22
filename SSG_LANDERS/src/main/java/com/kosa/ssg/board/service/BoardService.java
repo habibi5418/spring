@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -41,7 +42,7 @@ public class BoardService {
 	}
 	
 	// 특정 게시물 가져오기 (boardid)
-	public JSONObject getBoardByBoardid(int boardid, String order) {
+	public JSONObject getBoardByBoardid(int boardid, String order) throws JSONException, Exception {
 		JSONObject result = new JSONObject();
 		Board board = boardDao.getBoardByBoardid(boardid);
 		List<Board> boardList = new ArrayList<>();
@@ -80,6 +81,8 @@ public class BoardService {
 	    		result.put("prevBoardid", boardList.get(idx + 1).getBoardid());
 				result.put("nextBoardid", boardList.get(idx - 1).getBoardid());
 	    	}
+	    	
+	    	result.put("attachFileList", attachFileDao.getList(board));
 		}
 		System.out.println("상세페이지 : " + result);
 		return result;
@@ -135,20 +138,26 @@ public class BoardService {
 	// 글 작성
 	public JSONObject write(Board board) {
 		JSONObject result = new JSONObject();
+
+		if (board.getAttachFileList().size() != 0) {
+			board.setExistFile("Y");
+		} else {
+			board.setExistFile("N");
+		}
 		
 		if (boardDao.writeBoard(board) > 0) {
 			result.put("message", "글 작성이 완료되었습니다.");
 			result.put("status", true);
+
+			if (board.getAttachFileList().size() != 0) {
+				for (AttachFile attachFile : board.getAttachFileList()) {
+					attachFile.setBoardid(boardDao.getWriteBoard(board));
+					attachFileDao.insert(attachFile);
+				}
+			}
 		} else {
 			result.put("message", "글 작성에 실패하였습니다.");
 			result.put("status", false);
-		}
-		
-		if (board.getAttacheFileList() != null) {
-			for (AttachFile attachFile : board.getAttacheFileList()) {
-				attachFile.setBoardid(board.getBoardid());
-				attachFileDao.insert(attachFile);
-			}
 		}
 		
 		return result;
@@ -158,6 +167,12 @@ public class BoardService {
 	public JSONObject update(Board board) {
 		JSONObject result = new JSONObject();
 		
+		if (board.getAttachFileList().size() != 0) {
+			board.setExistFile("Y");
+		} else {
+			board.setExistFile("N");
+		}
+		
 		if (boardDao.updateBoard(board) > 0) {
 			result.put("message", "글 수정이 완료되었습니다.");
 			result.put("status", true);
@@ -166,10 +181,11 @@ public class BoardService {
 			result.put("status", false);
 		}
 		
-		if (board.getAttacheFileList() != null) {
-			for (AttachFile attachFile : board.getAttacheFileList()) {
+		if (board.getAttachFileList().size() != 0) {
+			attachFileDao.delete(board.getBoardid());
+			for (AttachFile attachFile : board.getAttachFileList()) {
 				attachFile.setBoardid(board.getBoardid());
-//				attachFileDao.update(attachFile);
+				attachFileDao.update(attachFile);
 			}
 		}
 		
@@ -181,6 +197,7 @@ public class BoardService {
 		JSONObject result = new JSONObject();
 		
 		if (boardDao.deleteBoard(board) > 0) {
+			attachFileDao.delete(board.getBoardid());
 			result.put("message", "글 삭제가 완료되었습니다.");
 			result.put("status", true);
 		} else {
@@ -210,20 +227,26 @@ public class BoardService {
 	// 답글 작성
 	public JSONObject reply(Board board) {
 		JSONObject result = new JSONObject();
+
+		if (board.getAttachFileList().size() != 0) {
+			board.setExistFile("Y");
+		} else {
+			board.setExistFile("N");
+		}
 		
 		if (boardDao.replyBoard(board) > 0) {
 			result.put("message", "답글 작성이 완료되었습니다.");
 			result.put("status", true);
+			
+			if (board.getAttachFileList().size() != 0) {
+				for (AttachFile attachFile : board.getAttachFileList()) {
+					attachFile.setBoardid(boardDao.getWriteBoard(board));
+					attachFileDao.insert(attachFile);
+				}
+			}
 		} else {
 			result.put("message", "답글 작성에 실패하였습니다.");
 			result.put("status", false);
-		}
-		
-		if (board.getAttacheFileList() != null) {
-			for (AttachFile attachFile : board.getAttacheFileList()) {
-				attachFile.setBoardid(board.getBoardid());
-				attachFileDao.insert(attachFile);
-			}
 		}
 		
 		return result;

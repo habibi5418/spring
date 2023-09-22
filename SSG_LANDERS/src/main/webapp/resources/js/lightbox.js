@@ -20,3 +20,5 @@ function showLightbox() {
 lightbox.onclick = function() {  //click 이벤트가 발생했을 때 실행할 함수 선언
 	lightbox.style.display = "none";  // lightbox 요소를 화면에서 감춤
 }
+
+

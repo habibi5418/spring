@@ -39,6 +39,9 @@
 									<a onclick="detailBoard(this.getAttribute('data-boardid'))" href="#" data-boardid="${board.boardid}">
 										${board.title }
 									</a>
+									<c:if test="${board.existFile == 'Y'}">
+										<img src="<c:url value='/resources/images/clip.png'/>" style="width: 15px; height: 15px; padding-top: 2px;">
+									</c:if>
 								</td>
 								<td>${board.getWriter_uid() }</td>
 								<td>${board.getReg_date() }</td>
@@ -101,6 +104,8 @@
 						    <p id="detailDateText" class="date"></p>
 					    </div>
 					    <p id="detailContentsText" class="contents"></p>
+				        <div id="detailFiles" style="margin:30px auto; text-align: center;">
+				        </div>
 			    		<div id="commentForm">
 					    	<hr>
 			    			<label id="commentLabel" for="commentContents">댓글</label>
@@ -125,36 +130,51 @@
 			</div>
 			
 			<div id="write-form" class="dialog-form" title="글 작성 폼">
-				<form method="post" autocomplete="off">
+				<form id="wForm" autocomplete="off" enctype="multipart/form-data">
 					<fieldset>
+						<input type="hidden" name="writer_uid" value="${loginMember.memid }" />
 						<label for="writeTitle">글 제목</label>
-						<input type="text" name="writeTitle" id="writeTitle" class="text ui-widget-content ui-corner-all" placeholder="제목을 입력하세요." required>
+						<input type="text" name="title" id="writeTitle" class="text ui-widget-content ui-corner-all" placeholder="제목을 입력하세요." required>
 						<label for="writeContents">글 내용</label>
-						<textarea name="writeContents" id="writeContents" class="writeContents" rows="8" placeholder="내용을 입력하세요." required class="text ui-widget-content ui-corner-all"></textarea>
+						<textarea name="contents" id="writeContents" class="writeContents" rows="8" placeholder="내용을 입력하세요." required class="text ui-widget-content ui-corner-all"></textarea>
 					</fieldset>
+					<input type="button" value="파일 추가" class="detailBtns" onClick="w_addFile()"/><br>
+					<div id="w_file"></div>
 				</form>
 			</div>
 			
 			<div id="update-form" class="dialog-form" title="글 수정 폼">
-				<form method="post" autocomplete="off">
+				<form id="uForm" method="post" autocomplete="off">
 					<fieldset>
+						<input type="hidden" id="updateBoardid" name="boardid" value="" />
+						<input type="hidden" name="writer_uid" value="${loginMember.memid }" />
 						<label for="updateTitle">글 제목</label>
-						<input type="text" name="updateTitle" id="updateTitle" class="text ui-widget-content ui-corner-all" placeholder="제목을 입력하세요." required>
+						<input type="text" name="title" id="updateTitle" class="text ui-widget-content ui-corner-all" placeholder="제목을 입력하세요." required>
 						<label for="updateContents">글 내용</label>
-						<textarea name="updateContents" id="updateContents" class="writeContents" rows="8" placeholder="내용을 입력하세요." required class="text ui-widget-content ui-corner-all"></textarea>
+						<textarea name="contents" id="updateContents" class="writeContents" rows="8" placeholder="내용을 입력하세요." required class="text ui-widget-content ui-corner-all"></textarea>
 					</fieldset>
+					<input type="button" value="파일 추가" onClick="u_addFile()"/><br>
+					<div id="u_file"></div>
 				</form>
 			</div>
 			
 			<div id="reply-form" class="dialog-form" title="답글 작성 폼">
-				<form method="post" autocomplete="off">
+				<form id="rForm" method="post" autocomplete="off">
 					<fieldset>
+						<input type="hidden" id="replyPid" name="pid" value="" />
+						<input type="hidden" name="writer_uid" value="${loginMember.memid }" />
 						<label for="replyTitle">글 제목</label>
-						<input type="text" name="replyTitle" id="replyTitle" class="text ui-widget-content ui-corner-all" placeholder="제목을 입력하세요." required>
+						<input type="text" name="title" id="replyTitle" class="text ui-widget-content ui-corner-all" placeholder="제목을 입력하세요." required>
 						<label for="replyContents">글 내용</label>
-						<textarea name="replyContents" id="replyContents" class="writeContents" rows="8" placeholder="내용을 입력하세요." required class="text ui-widget-content ui-corner-all"></textarea>
+						<textarea name="contents" id="replyContents" class="writeContents" rows="8" placeholder="내용을 입력하세요." required class="text ui-widget-content ui-corner-all"></textarea>
 					</fieldset>
+					<input type="button" value="파일 추가" onClick="r_addFile()"/><br>
+					<div id="r_file"></div>
 				</form>
+			</div>
+			
+			<div id="lightbox">
+				<img src="" alt="" id="lightboxImage">
 			</div>
 			
 		</div>
@@ -175,6 +195,7 @@
 	            close: function() {
 	            	writeTitle.val("");
 	            	writeContents.val("");
+	            	w_cnt = 1;
 	            }
 	        });
 	    	
@@ -194,6 +215,8 @@
 					nextlistButton.css("display", "block");
 					commentList.text("");
 					commentContents.val("");
+					cnt = 1;
+					isOpenCommentUpdate = false;
 	            }
 	        });
 	    	
@@ -209,6 +232,7 @@
 	                }
 	            },
 	            close: function() {
+	            	u_cnt = 1;
 	            }
 	        });
 	    	
@@ -220,32 +244,32 @@
 	            buttons: {
 	                "작성": replyBoard,
 	                "취소": function() {
-	                	$("#reply-form").dialog("close");
-	                },
-	                close: function() {
 		            	replyTitle.val("");
 		            	replyContents.val("");
-		            }
+	                	$("#reply-form").dialog("close");
+	                }
 	            },
 	            close: function() {
 	            	replyTitle.val("");
 	            	replyContents.val("");
+	            	r_cnt = 1;
 	            }
 	        });
 	    });
 	    
-        var writeTitle = $("#writeTitle"),
+	    var writeTitle = $("#writeTitle"),
 			writeContents = $("#writeContents"),
 			detailBoardid = $("#detailBoardid"),
 			detailTitleText = $("#detailTitleText"),
 			detailWriterText = $("#detailWriterText"),
 			detailDateText = $("#detailDateText"),
 			detailContentsText = $("#detailContentsText"),
-        	prevlistButton = $("#prevlistButton"),
-        	nextlistButton = $("#nextlistButton"),
-        	btnForWriter = $("#btnForWriter");
+	    	prevlistButton = $("#prevlistButton"),
+	    	nextlistButton = $("#nextlistButton"),
+	    	btnForWriter = $("#btnForWriter");
 	    	updateButton = $("#updateButton"),
 	    	deleteButton = $("#deleteButton"),
+	    	updateBoardid = $("#updateBoardid"),
 	    	updateTitle = $("#updateTitle"),
 	    	updateContents = $("#updateContents"),
 	    	replyTitle = $("#replyTitle"),
@@ -253,13 +277,13 @@
 			commentContents = $("#commentContents"),
 			commentList = $("#commentList");
 		
-     	// 다이얼로그 오픈
-        $("#listWriteButton").button().on("click", function() {
-        	$("#write-form").dialog("open");
-        });
-        
-        updateButton.on("click", function() {
-        	const param = {
+	 	// 다이얼로그 오픈
+	    $("#listWriteButton").button().on("click", function() {
+	    	$("#write-form").dialog("open");
+	    });
+	    
+	    updateButton.on("click", function() {
+	    	const param = {
 					boardid: detailBoardid.val(),
 					order: "recent"
 			}
@@ -273,31 +297,49 @@
 			})
 			.then((response) => response.json())
 			.then((json) => {
+				updateBoardid.val(detailBoardid.val());
 				updateTitle.val(json.title);
 				updateContents.val(json.contents);
 			});
-        	
-        	$("#update-form").dialog("open");
-        });
-        
-        $("#replyButton").on("click", function() {
-        	$("#reply-form").dialog("open");
-        });
-        
-     	// 글 작성
+	    	
+	    	$("#update-form").dialog("open");
+	    });
+	    
+	    $("#replyButton").on("click", function() {
+	    	$("#replyPid").val(detailBoardid.val());
+	    	$("#reply-form").dialog("open");
+	    });
+	    
+		// 글 작성 첨부파일 추가
+	    var w_cnt = 1;
+	    function w_addFile(){
+	    	$("#w_file").append("<input type='file' name='file" + w_cnt + "' />");
+	    	w_cnt++;
+	    }
+	    
+		// 글 수정 첨부파일 추가
+	    var u_cnt = 1;
+	    function u_addFile(){
+	    	$("#u_file").append("<input type='file' name='file" + u_cnt + "' />");
+	    	u_cnt++;
+	    }
+	    
+		// 답글 첨부파일 추가
+	    var r_cnt = 1;
+	    function r_addFile(){
+	    	$("#r_file").append("<input type='file' name='file" + r_cnt + "' />");
+	    	r_cnt++;
+	    }
+	    
+	 	// 글 작성
 		function writeBoard() {
-			const param = {
-					title: writeTitle.val(),
-					contents: writeContents.val(),
-					writer_uid: '${loginMember.memid}'
-			}
+			const form = $("#wForm")[0];
+			const formData = new FormData(form);
 			
 			fetch("<c:url value='/board/writeBoard.do'/>", {
 				method: "POST",
-				headers: {
-				    "Content-Type": "application/json; charset=UTF-8",
-				},
-				body: JSON.stringify(param),
+				headers: {},
+				body: formData,
 			})
 			.then((response) => response.json())
 			.then((json) => {
@@ -308,8 +350,8 @@
 				}
 			});
 		}    
-     	
-        // 상세보기
+	 	
+	    // 상세보기
 	    function detailBoard(boardid) {
 			const param = {
 					boardid: boardid,
@@ -337,7 +379,7 @@
 					if (json.reg_date != json.mod_date) detailDateText.append(" (수정시각 : " + json.mod_date + ") ");
 					detailDateText.append(" 조회 " + json.view_count);
 					detailContentsText.text(json.contents);
-
+	
 		        	prevlistButton.css("display", "block");
 					nextlistButton.css("display", "block");
 					prevlistButton.attr("data-boardid", json.prevBoardid);
@@ -348,98 +390,153 @@
 					btnForWriter.css("display", "block");
 					if ("${loginMember.memid}" !=  json.writer_uid) btnForWriter.css("display", "none");
 					
+					// 첨부파일 
+	   				const attachFileList = json.attachFileList;
+	   				const detailFiles = $("#detailFiles");
+	   				detailFiles.empty();
+	   				
+	   				for (let i = 0; i < attachFileList.length; i++) {
+							const file = attachFileList[i];
+							const path = "<c:url value='/attachFile/download.do?fileNo='/>" + file.fileNo;
+							const fileImgPath = "<c:url value='/resources/images/file.png'/>";
+						const fileType = file.contentType.split("/")[0];
+							var existImg = false;
+							
+							if (fileType == "image") {
+	   						detailFiles.append(
+	   								"<img src='" + path + "' style='width: 800px; height: auto; margin: 30px auto;'"
+	   									+ " class='pic'><br/>"
+	//	   								"<a href='" + path + "' download><img src='" + path 
+	//	   									+ "' style='width: 800px; height: auto; margin: 30px auto;'"
+	//	   									+ "></a><br/>"
+							);
+	   						
+							existImg = true;
+							} else {
+	   						detailFiles.append(
+	   								"<a href='" + path + "' download>"
+	   									+ "<img src='" + fileImgPath + "' style='width: 30px; height: 30px;'><h3>" 
+	   									+ file.fileNameOrg + "</h3></a><br/>"
+							);
+							}
+	   				}
+	
+	   				// 라이트박스
+						var lightbox = document.getElementById("lightbox");  
+						var lightboxImage = document.getElementById("lightboxImage");  
+						var closeBeforeBoardid;
+						
+					if (existImg) {
+						var pics = document.getElementsByClassName("pic");
+	
+	  					for (var j = 0; j < pics.length; j++) {
+	  						pics[j].addEventListener("click", function() {
+	  							var bigLocation = this.getAttribute("src"); 
+	      						lightboxImage.setAttribute("src", bigLocation); 
+	      						lightbox.style.display = "block"; 
+	      						if (lightboxImage.width < lightboxImage.height) {
+	      							lightboxImage.style.height = 100 + "%";
+	      						} else {
+	      							lightboxImage.style.height = 75 + "%";
+	      						}
+	      						closeBeforeBoardid = detailBoardid.val();
+	      						$("#detail-form").dialog("close");
+	  						});
+	  					}
+					}
+					
+						lightbox.onclick = function() {  //click 이벤트가 발생했을 때 실행할 함수 선언
+							lightbox.style.display = "none";  // lightbox 요소를 화면에서 감춤
+							detailBoard(closeBeforeBoardid);
+						}
+	  					
 					// 댓글 불러오기 
 					const param2 = {
 						replyid: 0,
-       	    			boardid: detailBoardid.val()
-       	    		}
-       	    		
-       	    		fetch("<c:url value='/board/getCommentBoard.do'/>", {
-       					method: "POST",
-       					headers: {
-       					    "Content-Type": "application/json; charset=UTF-8",
-       					},
-       					body: JSON.stringify(param2),
-       				})
-       				.then((response) => response.json())
-       				.then((json) => {
-       					const commentList = json.commentList;
-       					const commentListHTML = document.querySelector("#commentList");
-       					const moreCommentDiv = $("#moreCommentDiv");
-       					
-       					commentListHTML.innerHTML = "";
-       					
-       					for (let i = 0; i < commentList.length; i++) {
-       						const comment = commentList[i];
-       						
-       						let createDivTag = document.createElement('div');
-       						let createCommentReplyid = document.createElement('input');
-       						let createCommentWriter = document.createElement('h3');
-       						let createCommentContents = document.createElement('p');
-       						let createCommentRegDate = document.createElement('p');
-       						
-       						createDivTag.setAttribute("id", "commentDiv");
-
-       						createCommentReplyid.setAttribute("id", "commentReplyid");
-       						createCommentReplyid.setAttribute("type", "hidden");
-       						createCommentReplyid.setAttribute("value", comment.replyid);
-       						
-       						createCommentWriter.setAttribute("id", "commentWriter");
-       						createCommentWriter.innerHTML = comment.writer_uid;
-       						
-       						createCommentContents.setAttribute("id", "commentContents");
-       						createCommentContents.innerHTML = comment.contents;
-       						
-       						createCommentRegDate.setAttribute("id", "commentRegDate");
-      						createCommentRegDate.innerHTML = comment.reg_date;
-       						
-       						createDivTag.appendChild(createCommentReplyid);
-       						createDivTag.appendChild(createCommentWriter);
-       						createDivTag.appendChild(createCommentContents);
-       						createDivTag.appendChild(createCommentRegDate);
-
-       						if ("${loginMember.memid}" == comment.writer_uid) {
-       	   						let createCommentUpdateBtn = document.createElement('a');
-       	   						let createCommentDeleteBtn = document.createElement('a');
-       	   						createCommentUpdateBtn.setAttribute("id", "commentUpdateBtn");
-       	   						createCommentDeleteBtn.setAttribute("id", "commentDeleteBtn");
-       	   						createCommentUpdateBtn.href = "#";
-       	   						createCommentDeleteBtn.href = "#";
-       	   						createCommentUpdateBtn.setAttribute("onclick", "commentUpdate(this)");
-       	   						createCommentDeleteBtn.setAttribute("onclick", "commentDelete(" + comment.replyid + ")");
-       	   						createCommentUpdateBtn.innerText = "댓글 수정";
-       	   						createCommentDeleteBtn.innerText = "댓글 삭제";
-       	   						createDivTag.appendChild(createCommentUpdateBtn);
-       	   						createDivTag.appendChild(createCommentDeleteBtn);
-       						}	
-       						
-       						commentListHTML.append(createDivTag);
-       					}
-   						
-   						moreCommentDiv.css("display", "none");
-   						if (json.cnt == 10) moreCommentDiv.css("display", "block");
-   						
-       				});
+	   	    			boardid: detailBoardid.val()
+	   	    		}
+	   	    		
+	   	    		fetch("<c:url value='/board/getCommentBoard.do'/>", {
+	   					method: "POST",
+	   					headers: {
+	   					    "Content-Type": "application/json; charset=UTF-8",
+	   					},
+	   					body: JSON.stringify(param2),
+	   				})
+	   				.then((response) => response.json())
+	   				.then((json) => {
+	   					const commentList = json.commentList;
+	   					const commentListHTML = document.querySelector("#commentList");
+	   					const moreCommentDiv = $("#moreCommentDiv");
+	   					
+	   					commentListHTML.innerHTML = "";
+	   					
+	   					for (let i = 0; i < commentList.length; i++) {
+	   						const comment = commentList[i];
+	   						
+	   						let createDivTag = document.createElement('div');
+	   						let createCommentReplyid = document.createElement('input');
+	   						let createCommentWriter = document.createElement('h3');
+	   						let createCommentContents = document.createElement('p');
+	   						let createCommentRegDate = document.createElement('p');
+	   						
+	   						createDivTag.setAttribute("id", "commentDiv");
+	
+	   						createCommentReplyid.setAttribute("id", "commentReplyid");
+	   						createCommentReplyid.setAttribute("type", "hidden");
+	   						createCommentReplyid.setAttribute("value", comment.replyid);
+	   						
+	   						createCommentWriter.setAttribute("id", "commentWriter");
+	   						createCommentWriter.innerHTML = comment.writer_uid;
+	   						
+	   						createCommentContents.setAttribute("id", "commentContents");
+	   						createCommentContents.innerHTML = comment.contents;
+	   						
+	   						createCommentRegDate.setAttribute("id", "commentRegDate");
+	  						createCommentRegDate.innerHTML = comment.reg_date;
+	   						
+	   						createDivTag.appendChild(createCommentReplyid);
+	   						createDivTag.appendChild(createCommentWriter);
+	   						createDivTag.appendChild(createCommentContents);
+	   						createDivTag.appendChild(createCommentRegDate);
+	
+	   						if ("${loginMember.memid}" == comment.writer_uid) {
+	   	   						let createCommentUpdateBtn = document.createElement('a');
+	   	   						let createCommentDeleteBtn = document.createElement('a');
+	   	   						createCommentUpdateBtn.setAttribute("id", "commentUpdateBtn");
+	   	   						createCommentDeleteBtn.setAttribute("id", "commentDeleteBtn");
+	   	   						createCommentUpdateBtn.href = "#";
+	   	   						createCommentDeleteBtn.href = "#";
+	   	   						createCommentUpdateBtn.setAttribute("onclick", "commentUpdate(this)");
+	   	   						createCommentDeleteBtn.setAttribute("onclick", "commentDelete(" + comment.replyid + ")");
+	   	   						createCommentUpdateBtn.innerText = "댓글 수정";
+	   	   						createCommentDeleteBtn.innerText = "댓글 삭제";
+	   	   						createDivTag.appendChild(createCommentUpdateBtn);
+	   	   						createDivTag.appendChild(createCommentDeleteBtn);
+	   						}	
+	   						
+	   						commentListHTML.append(createDivTag);
+	   					}
+							
+							moreCommentDiv.css("display", "none");
+							if (json.cnt == 10) moreCommentDiv.css("display", "block");
+							
+	   				});
 					
 					$("#detail-form").dialog("open");
 				}
 			});
 		}
-        
-        // 수정
-        function updateBoard() {
-        	const param = {
-					boardid: detailBoardid.val(),
-					title: updateTitle.val(),
-					contents: updateContents.val()
-			}
-			
+	    
+	    // 수정
+	    function updateBoard() {
+			const form = $("#uForm")[0];
+			const formData = new FormData(form);
+	
 			fetch("<c:url value='/board/updateBoard.do'/>", {
 				method: "POST",
-				headers: {
-				    "Content-Type": "application/json; charset=UTF-8",
-				},
-				body: JSON.stringify(param),
+				headers: {},
+				body: formData,
 			})
 			.then((response) => response.json())
 			.then((json) => {
@@ -450,45 +547,39 @@
 		        	detailBoard(detailBoardid.val());
 				}
 			});
-        }
-        
-        // 삭제
-        deleteButton.on("click", function() {
-      		if (confirm("게시물을 삭제하시겠습니까 ?")) {
-      			const param = {
-    					boardid: detailBoardid.val()
-    			}
-    			
-    			fetch("<c:url value='/board/deleteBoard.do'/>", {
-    				method: "POST",
-    				headers: {
-    				    "Content-Type": "application/json; charset=UTF-8",
-    				},
-    				body: JSON.stringify(param),
-    			})
-    			.then((response) => response.json())
-    			.then((json) => {
-    				alert(json.message);
-    				if (json.status) location.href = "<c:url value='/board/listBoardForAdmin.do'/>";
-    			});
-      		}
-      	});
-        
-     	// 답글 작성
+	    }
+	    
+	    // 삭제
+	    deleteButton.on("click", function() {
+	  		if (confirm("게시물을 삭제하시겠습니까 ?")) {
+	  			const param = {
+						boardid: detailBoardid.val()
+				}
+				
+				fetch("<c:url value='/board/deleteBoard.do'/>", {
+					method: "POST",
+					headers: {
+					    "Content-Type": "application/json; charset=UTF-8",
+					},
+					body: JSON.stringify(param),
+				})
+				.then((response) => response.json())
+				.then((json) => {
+					alert(json.message);
+					if (json.status) location.href = "<c:url value='/board/listBoardForAdmin.do'/>";
+				});
+	  		}
+	  	});
+	    
+	 	// 답글 작성
 		function replyBoard() {
-			const param = {
-					title: replyTitle.val(),
-					contents: replyContents.val(),
-					writer_uid: '${loginMember.memid}',
-					pid: detailBoardid.val()
-			}
+			const form = $("#rForm")[0];
+			const formData = new FormData(form);
 			
 			fetch("<c:url value='/board/replyBoard.do'/>", {
 				method: "POST",
-				headers: {
-				    "Content-Type": "application/json; charset=UTF-8",
-				},
-				body: JSON.stringify(param),
+				headers: {},
+				body: formData,
 			})
 			.then((response) => response.json())
 			.then((json) => {
@@ -500,9 +591,9 @@
 			});
 		}    
 		
-     	// 댓글 작성
-     	function writeComment() {
-     		const param = {
+	 	// 댓글 작성
+	 	function writeComment() {
+	 		const param = {
 					contents: commentContents.val(),
 					writer_uid: '${loginMember.memid}',
 					boardid: detailBoardid.val()
@@ -520,20 +611,83 @@
 				alert(json.message);
 				if (json.status) {
 					commentContents.val("");
-					detailBoard(detailBoardid.val());
+					
+					const param2 = {
+	   	    			boardid: detailBoardid.val()
+	   	    		}
+	   	    		
+	   	    		fetch("<c:url value='/board/getWriteComment.do'/>", {
+	   					method: "POST",
+	   					headers: {
+	   					    "Content-Type": "application/json; charset=UTF-8",
+	   					},
+	   					body: JSON.stringify(param2),
+	   				})
+	   				.then((response) => response.json())
+	   				.then((json) => {
+	   					const commentList = json.commentList;
+	   					const commentListHTML = document.querySelector("#commentList");
+	   					const moreCommentDiv = $("#moreCommentDiv");
+	   					const lastComment = document.querySelector("#commentList > div:last-child");
+	   					
+	   					for (let i = 0; i < commentList.length; i++) {
+	   						const comment = commentList[i];
+	   						
+	   						let createDivTag = document.createElement('div');
+	   						let createCommentReplyid = document.createElement('input');
+	   						let createCommentWriter = document.createElement('h3');
+	   						let createCommentContents = document.createElement('p');
+	   						let createCommentRegDate = document.createElement('p');
+	   						
+	   						createDivTag.setAttribute("id", "commentDiv");
+	
+	   						createCommentReplyid.setAttribute("id", "commentReplyid");
+	   						createCommentReplyid.setAttribute("type", "hidden");
+	   						createCommentReplyid.setAttribute("value", comment.replyid);
+	   						       						
+	   						createCommentWriter.setAttribute("id", "commentWriter");
+	   						createCommentWriter.innerHTML = comment.writer_uid;
+	   						
+	   						createCommentContents.setAttribute("id", "commentContents");
+	   						createCommentContents.innerHTML = comment.contents;
+	   						
+	   						createCommentRegDate.setAttribute("id", "commentRegDate");
+	   						createCommentRegDate.innerHTML = comment.reg_date;
+	
+	   						createDivTag.appendChild(createCommentReplyid);
+	   						createDivTag.appendChild(createCommentWriter);
+	   						createDivTag.appendChild(createCommentContents);
+	   						createDivTag.appendChild(createCommentRegDate);
+	
+		   						let createCommentUpdateBtn = document.createElement('a');
+		   						let createCommentDeleteBtn = document.createElement('a');
+		   						createCommentUpdateBtn.setAttribute("id", "commentUpdateBtn");
+		   						createCommentDeleteBtn.setAttribute("id", "commentDeleteBtn");
+		   						createCommentUpdateBtn.href = "#";
+		   						createCommentDeleteBtn.href = "#";
+		   						createCommentUpdateBtn.setAttribute("onclick", "commentUpdate(this)");
+		   						createCommentDeleteBtn.setAttribute("onclick", "commentDelete(" + comment.replyid + ")");
+		   						createCommentUpdateBtn.innerText = "댓글 수정";
+		   						createCommentDeleteBtn.innerText = "댓글 삭제";
+		   						createDivTag.appendChild(createCommentUpdateBtn);
+		   						createDivTag.appendChild(createCommentDeleteBtn);
+	   						
+	   						commentListHTML.prepend(createDivTag);
+	   					}
+	   				});
 				}
 			});
-     	}    
+	 	}    
 		
-     	// 댓글 더보기
-     	document.querySelector("#moreCommentList").addEventListener("click", function() {
+	 	// 댓글 더보기
+	 	document.querySelector("#moreCommentList").addEventListener("click", function() {
 			const lastReplyid = document.querySelector("#commentList > div:last-child > input:first-child").value;
 			
 			const param2 = {
 				replyid: lastReplyid,
-    			boardid: detailBoardid.val()
-    		}
-       	    		
+				boardid: detailBoardid.val()
+			}
+	   	    		
 	   		fetch("<c:url value='/board/getCommentBoard.do'/>", {
 				method: "POST",
 				headers: {
@@ -557,7 +711,7 @@
 					let createCommentRegDate = document.createElement('p');
 					
 					createDivTag.setAttribute("id", "commentDiv");
-
+	
 					createCommentReplyid.setAttribute("id", "commentReplyid");
 					createCommentReplyid.setAttribute("type", "hidden");
 					createCommentReplyid.setAttribute("value", comment.replyid);
@@ -577,18 +731,18 @@
 					createDivTag.appendChild(createCommentRegDate);
 					
 					if ("${loginMember.memid}" == comment.writer_uid) {
-   						let createCommentUpdateBtn = document.createElement('a');
-   						let createCommentDeleteBtn = document.createElement('a');
-   						createCommentUpdateBtn.setAttribute("id", "commentUpdateBtn");
-   						createCommentDeleteBtn.setAttribute("id", "commentDeleteBtn");
-   						createCommentUpdateBtn.href = "#";
-   						createCommentDeleteBtn.href = "#";
-   						createCommentUpdateBtn.setAttribute("onclick", "commentUpdate(this)");
-   						createCommentDeleteBtn.setAttribute("onclick", "commentDelete(" + comment.replyid + ")");
-   						createCommentUpdateBtn.innerText = "댓글 수정";
-   						createCommentDeleteBtn.innerText = "댓글 삭제";
-   						createDivTag.appendChild(createCommentUpdateBtn);
-   						createDivTag.appendChild(createCommentDeleteBtn);
+							let createCommentUpdateBtn = document.createElement('a');
+							let createCommentDeleteBtn = document.createElement('a');
+							createCommentUpdateBtn.setAttribute("id", "commentUpdateBtn");
+							createCommentDeleteBtn.setAttribute("id", "commentDeleteBtn");
+							createCommentUpdateBtn.href = "#";
+							createCommentDeleteBtn.href = "#";
+							createCommentUpdateBtn.setAttribute("onclick", "commentUpdate(this)");
+							createCommentDeleteBtn.setAttribute("onclick", "commentDelete(" + comment.replyid + ")");
+							createCommentUpdateBtn.innerText = "댓글 수정";
+							createCommentDeleteBtn.innerText = "댓글 삭제";
+							createDivTag.appendChild(createCommentUpdateBtn);
+							createDivTag.appendChild(createCommentDeleteBtn);
 					}	
 						
 					commentListHTML.append(createDivTag);
@@ -600,34 +754,43 @@
 				if (!json.check) moreCommentDiv.css("display", "none");
 				
 			});
-     	});
-     	
-     	// 댓글 수정창 오픈
-     	function commentUpdate(updateBtn) {
-     		let commentDiv = updateBtn.parentNode;
-			let createCommentUpdateArea = document.createElement("textarea");
-			let createCommentUpdateInput = document.createElement("input");
-			
-			createCommentUpdateArea.setAttribute("id", "updateCommentContents");
-			createCommentUpdateArea.setAttribute("placeholder", "수정할 댓글 내용으로 적어주세요.");
-			
-			createCommentUpdateInput.setAttribute("id", "updateComment");
-			createCommentUpdateInput.setAttribute("class", "detailBtns");
-			createCommentUpdateInput.setAttribute("type", "button");
-			createCommentUpdateInput.setAttribute("onclick", "updateComment(" + commentDiv.firstChild.value + ",this)");
-			createCommentUpdateInput.setAttribute("value", "댓글 수정");
-			
-			commentDiv.append(createCommentUpdateArea);
-			commentDiv.append(createCommentUpdateInput);
-     	}
-     	
-     	// 댓글 수정
-     	function updateComment(replyid, updateComment) {
-     		const param = {
-     				replyid: replyid,
+	 	});
+	 	
+	 	// 댓글 수정창 오픈
+	 	function commentUpdate(updateBtn) {
+	     		let commentDiv = updateBtn.parentNode;
+	     		console.log(commentDiv);
+	     		if (commentDiv.getAttribute("data-isOpen") == null || commentDiv.getAttribute("data-isOpen") == "no") {
+	     			commentDiv.setAttribute("data-isOpen", true);
+	     			
+					let createCommentUpdateArea = document.createElement("textarea");
+					let createCommentUpdateInput = document.createElement("input");
+					
+					createCommentUpdateArea.setAttribute("id", "updateCommentContents");
+					createCommentUpdateArea.setAttribute("placeholder", "수정할 댓글 내용으로 적어주세요.");
+					
+					createCommentUpdateInput.setAttribute("id", "updateComment");
+					createCommentUpdateInput.setAttribute("class", "detailBtns");
+					createCommentUpdateInput.setAttribute("type", "button");
+					createCommentUpdateInput.setAttribute("onclick", "updateComment(" + commentDiv.firstChild.value + ",this)");
+					createCommentUpdateInput.setAttribute("value", "댓글 수정");
+					
+					commentDiv.append(createCommentUpdateArea);
+					commentDiv.append(createCommentUpdateInput);
+				} else {
+					commentDiv.setAttribute("data-isOpen", "no");
+		     		commentDiv.childNodes[6].remove();
+		     		commentDiv.childNodes[6].remove();
+				}
+	 	}
+	 	
+	 	// 댓글 수정
+	 	function updateComment(replyid, updateComment) {
+	 		const param = {
+	 				replyid: replyid,
 					contents: $("#updateCommentContents").val()
 			}
-     		
+	 		
 			fetch("<c:url value='/board/updateComment.do'/>", {
 				method: "POST",
 				headers: {
@@ -642,56 +805,56 @@
 					detailBoard(detailBoardid.val());
 				}
 			});
-     	}
-     	
-     	// 댓글 삭제
-     	function commentDelete(replyid) {
-     		if (confirm("댓글을 삭제하시겠습니까 ?")){
-     			const param = {
-         				replyid: replyid
-    			}
-         		
-    			fetch("<c:url value='/board/deleteComment.do'/>", {
-    				method: "POST",
-    				headers: {
-    				    "Content-Type": "application/json; charset=UTF-8",
-    				},
-    				body: JSON.stringify(param),
-    			})
-    			.then((response) => response.json())
-    			.then((json) => {
-    				alert(json.message);
-    				if (json.status) {
-    					detailBoard(detailBoardid.val());
-    				}
-    			});
-     		}
-     	}
+	 	}
+	 	
+	 	// 댓글 삭제
+	 	function commentDelete(replyid) {
+	 		if (confirm("댓글을 삭제하시겠습니까 ?")){
+	 			const param = {
+	     				replyid: replyid
+				}
+	     		
+				fetch("<c:url value='/board/deleteComment.do'/>", {
+					method: "POST",
+					headers: {
+					    "Content-Type": "application/json; charset=UTF-8",
+					},
+					body: JSON.stringify(param),
+				})
+				.then((response) => response.json())
+				.then((json) => {
+					alert(json.message);
+					if (json.status) {
+						detailBoard(detailBoardid.val());
+					}
+				});
+	 		}
+	 	}
 		
-    	// 검색
+		// 검색
 	    document.querySelector("#searchForm").addEventListener("submit", e => {
 	    	e.preventDefault();
-
+	
 			document.querySelector("#searchType").value = document.querySelector("#selectSearchType").value;
 	    	document.querySelector("#searchText").value = document.querySelector("#inputSearchText").value;
 	    	
-    		document.querySelector("#pageNo").value = 1;
-
-    		document.querySelector("#pageForm").submit();
+			document.querySelector("#pageNo").value = 1;
+	
+			document.querySelector("#pageForm").submit();
 		});
-    	
-    	// 게시물 건수 변경
-    	var selectPageLength = document.querySelector("#selectPageLength");
-    	selectPageLength.addEventListener("change", e => {
-    		document.querySelector("#pageLength").value = selectPageLength.value;
-    		document.querySelector("#pageForm").submit();
-    	});
-    
-    	// 페이지 이동
-    	function goPage(pageNo) {
-    		document.querySelector("#pageForm > #pageNo").value = pageNo;
-    		document.querySelector("#pageForm").submit();
-    	}
+		
+		// 게시물 건수 변경
+		var selectPageLength = document.querySelector("#selectPageLength");
+		selectPageLength.addEventListener("change", e => {
+			document.querySelector("#pageLength").value = selectPageLength.value;
+			document.querySelector("#pageForm").submit();
+		});
+	
+		// 페이지 이동
+		function goPage(pageNo) {
+			document.querySelector("#pageForm > #pageNo").value = pageNo;
+			document.querySelector("#pageForm").submit();
+		}
     	
     	// 전체 체크
     	document.querySelector("#allCheck").addEventListener("click", function() {

@@ -21,10 +21,11 @@ public class Board {
 	private String delete_yn;
 	private int pid;
 	private int level;
+	private String existFile;
 	
 	private int replyid;
 
-	private List<AttachFile> attacheFileList;
+	private List<AttachFile> attachFileList;
 	
 	private String order;
 	private String[] deleteBoards;

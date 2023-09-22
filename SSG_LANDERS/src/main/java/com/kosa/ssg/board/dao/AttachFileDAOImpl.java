@@ -31,6 +31,15 @@ public class AttachFileDAOImpl implements AttachFileDAO {
 	public void insert(AttachFile attachFile) {
 		sqlSession.insert("mapper.attach_file.insert", attachFile);
 	}
-	
+
+	@Override
+	public void update(AttachFile attachFile) {
+		sqlSession.insert("mapper.attach_file.insert", attachFile);
+	}
+
+	@Override
+	public void delete(int boardid) {
+		sqlSession.delete("mapper.attach_file.delete", boardid);
+	}
 
 } // end class

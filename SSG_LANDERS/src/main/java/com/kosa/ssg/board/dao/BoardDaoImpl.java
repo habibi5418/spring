@@ -37,6 +37,13 @@ public class BoardDaoImpl implements BoardDao {
 		return sqlSession.insert("mapper.board.writeBoard", board);
 	}
 	
+	// 방금 작성한 글번호 가져오기 (파일업로드용) 
+	@Override
+	public int getWriteBoard(Board board) {
+		List<Board> list = sqlSession.selectList("mapper.board.getWriteBoard", board);
+		return list.get(0).getBoardid();
+	}
+	
 	// 4. update (title, contents, mod_date) 조건 where boardid = ?
 	@Override
 	public int updateBoard(Board board) {

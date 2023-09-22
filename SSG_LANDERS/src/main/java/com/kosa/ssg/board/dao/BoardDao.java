@@ -9,6 +9,7 @@ public interface BoardDao {
 	List<Board> getAllBoardListByViewCount();
 	Board getBoardByBoardid(int boardid);
 	int writeBoard(Board board);
+	int getWriteBoard(Board board);
 	int updateBoard(Board board);
 	int deleteBoard(Board board);
 	int deleteBoards(Board board);

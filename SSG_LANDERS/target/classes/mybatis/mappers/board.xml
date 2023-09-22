@@ -22,7 +22,7 @@
 		select count(*) totalCount
 	    from board 
 	    where delete_yn = 'N'
-	    <if test="searchText != '' and searchText != null">
+    	<if test="searchText != '' and searchText != null">
 	    	<choose>
 		    	<when test="searchType == 'title'">
 		    		and title like concat(concat('%', #{searchText}), '%')
@@ -246,7 +246,7 @@
 	</update>
 	
 	<insert id="replyBoard">
-		insert into board(boardid, title, contents, writer_uid, pid, existFile)
+		insert into board(boardid, title, contents, writer_uid, pid, exist_File)
     	VALUES (seq_board.nextval, #{title}, #{contents}, #{writer_uid}, #{pid}, #{existFile})
 	</insert>
 	

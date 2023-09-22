@@ -72,7 +72,7 @@ public class BoardDaoImpl implements BoardDao {
 	// 전체 게시물 수 구하기
 	@Override
 	public int getTotalCount(Board board) {
-		Board getBoard = sqlSession.selectOne("mapper.board.getTotalCount");
+		Board getBoard = sqlSession.selectOne("mapper.board.getTotalCount", board);
 		return getBoard != null ? getBoard.getTotalCount() : 0;
 	}
 	

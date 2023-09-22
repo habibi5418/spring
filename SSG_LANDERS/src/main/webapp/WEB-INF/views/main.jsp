@@ -49,7 +49,10 @@
           <div id="board" class="tabContent">
             <ul>
            		<c:forEach var="board" items="${recentBoardList }">
-           			<li><a href="detailBoard?boardid=${board.getBoardid() }&order=recent">${board.getTitle() }</a><span>${board.getReg_date() }</span></li>
+           			<li>
+           				<a onclick="detailBoard(this.getAttribute('data-boardid'))" href="#" data-boardid="${board.boardid}">${board.title }</a>
+           				<span>${board.getReg_date() }</span>
+           			</li>
            		</c:forEach>
            		<c:if test="${fn:length(recentBoardList) == 0 }">
            			<li><h3>게시물이 존재하지 않습니다.</h3></li>
@@ -87,7 +90,7 @@
 	<div id="detail-form" class="dialog-form" title="공지사항 상세보기">
 		<div id="detailContainer">
 			<div id="detailBoard">
-				<input type="hidden" id="detailNoticeid" value="">
+				<input type="hidden" id="detailId" value="">
 				<div id="detailTitle">
 				    <h1 id="detailTitleText"></h1>
 				    <p id="detailWriterText" class="writer"></p>
@@ -95,8 +98,6 @@
 			    </div>
 			    <p id="detailContentsText" class="contents"></p>
 		  	</div>
-    		<a href="#" onclick="moveDetailNotice(this.getAttribute('data-noticeid'))" data-noticeid="{noticeid}" id="prevlistButton" class="detailBtns">이전글</a>
-    		<a href="#" onclick="moveDetailNotice(this.getAttribute('data-noticeid'))" data-noticeid="{noticeid}" id="nextlistButton" class="detailBtns">다음글</a>
 	  	</div>
 	</div>
 	
@@ -132,22 +133,18 @@
             	detailWriterText.text("");
             	detailDateText.text("");
             	detailContentsText.text("");
-            	prevlistButton.css("display", "block");
-				nextlistButton.css("display", "block");
             }
         });
     });
     
-    var detailNoticeid = $("#detailNoticeid"),
-		detailTitleText = $("#detailTitleText"),
-		detailWriterText = $("#detailWriterText"),
-		detailDateText = $("#detailDateText"),
-		detailContentsText = $("#detailContentsText"),
-    	prevlistButton = $("#prevlistButton"),
-    	nextlistButton = $("#nextlistButton");
+	var detailId = $("#detailId"),
+	detailTitleText = $("#detailTitleText"),
+	detailWriterText = $("#detailWriterText"),
+	detailDateText = $("#detailDateText"),
+	detailContentsText = $("#detailContentsText");
 
-    // 상세보기
-    function detailNotice(noticeid) {
+	// 공지사항 상세보기
+	function detailNotice(noticeid) {
 		const param = {
 				noticeid: noticeid,
 				order: "recent"
@@ -165,7 +162,7 @@
 			if (!json.status) {
 				alert(json.message);
 			} else {
-				detailNoticeid.val(json.noticeid);
+				detailId.val(json.noticeid);
 				
 				if (json.fixed_yn == "Y") {
 			    	detailTitleText.text("");
@@ -183,22 +180,44 @@
 				if (json.reg_date != json.mod_date) detailDateText.append(" (수정시각 : " + json.mod_date + ") ");
 				detailDateText.append(" 조회 " + json.view_count);
 				detailContentsText.text(json.contents);
-
-				prevlistButton.attr("data-noticeid", json.prevNoticeid);
-				nextlistButton.attr("data-noticeid", json.nextNoticeid);
-				if (json.first) prevlistButton.css("display", "none");
-				if (json.last) nextlistButton.css("display", "none");
 				
 				$("#detail-form").dialog("open");
 			}
 		});
 	}
-    
-    // 이전글, 다음글
-    function moveDetailNotice(move) {
-    	prevlistButton.css("display", "block");
-		nextlistButton.css("display", "block");
+
+	// 자유게시판 상세보기
+	function detailBoard(boardid) {
+		const param = {
+				boardid: boardid,
+				order: "recent"
+		}
 		
-		detailNotice(move);
-    }
+		fetch("<c:url value='/board/detailBoard.do'/>", {
+			method: "POST",
+			headers: {
+			    "Content-Type": "application/json; charset=UTF-8",
+			},
+			body: JSON.stringify(param),
+		})
+		.then((response) => response.json())
+		.then((json) => {
+			if (!json.status) {
+				alert(json.message);
+			} else {
+				detailId.val(json.boardid);
+				
+				detailTitleText.text(json.title);
+				
+				detailWriterText.text(json.writer_uid);
+				detailDateText.text(json.reg_date);
+				if (json.reg_date != json.mod_date) detailDateText.append(" (수정시각 : " + json.mod_date + ") ");
+				detailDateText.append(" 조회 " + json.view_count);
+				detailContentsText.text(json.contents);
+	
+				$("#detail-form").dialog("open");
+			}
+		});
+	}
+	
   </script>
